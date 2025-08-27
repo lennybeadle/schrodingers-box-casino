@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SuiWalletButton } from '@/components/SuiWalletButton';
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
@@ -18,6 +18,88 @@ export default function Home() {
   const [betAmount, setBetAmount] = useState<string>('0.01');
   const [isPlaying, setIsPlaying] = useState(false);
   const [lastResult, setLastResult] = useState<{ success: boolean; message: string; txUrl?: string; isWinner?: boolean } | null>(null);
+  const [isFunding, setIsFunding] = useState(false);
+  const [houseBalance, setHouseBalance] = useState<number>(0);
+
+  // Check house balance
+  const checkHouseBalance = async () => {
+    try {
+      const houseObject = await suiClient.getObject({
+        id: HOUSE_OBJECT_ID,
+        options: {
+          showContent: true,
+        }
+      });
+
+      const fields = (houseObject.data?.content as any)?.fields;
+      if (fields) {
+        const balance = parseInt(fields.balance) / 1_000_000_000;
+        setHouseBalance(balance);
+      }
+    } catch (error) {
+      console.error('Failed to fetch house balance:', error);
+    }
+  };
+
+  // Fund the house
+  const handleFundHouse = async () => {
+    if (!currentAccount) {
+      alert('Please connect your Sui wallet first');
+      return;
+    }
+
+    setIsFunding(true);
+    try {
+      const fundAmount = 1.0; // Fund with 1 SUI
+      const amountMist = Math.floor(fundAmount * 1_000_000_000);
+
+      // Create transaction to fund house
+      const txb = new Transaction();
+      const [coin] = txb.splitCoins(txb.gas, [amountMist]);
+      
+      txb.moveCall({
+        target: `${PACKAGE_ID}::casino::fund_house`,
+        arguments: [
+          txb.object(HOUSE_OBJECT_ID),
+          coin,
+        ],
+      });
+
+      console.log('Funding house with 1 SUI...');
+
+      const result = await new Promise((resolve, reject) => {
+        signAndExecuteTransaction(
+          { transaction: txb },
+          {
+            onSuccess: (data) => {
+              console.log('House funding successful:', data);
+              resolve(data);
+            },
+            onError: (error) => {
+              console.error('House funding failed:', error);
+              reject(error);
+            },
+          }
+        );
+      });
+
+      alert('🏦 House funded successfully! You can now place bets.');
+      checkHouseBalance(); // Refresh balance
+
+    } catch (error: any) {
+      console.error('Fund house failed:', error);
+      alert(`Failed to fund house: ${error.message || 'Unknown error'}`);
+    } finally {
+      setIsFunding(false);
+    }
+  };
+
+  // Load house balance on component mount
+  useEffect(() => {
+    if (currentAccount) {
+      checkHouseBalance();
+    }
+  }, [currentAccount, HOUSE_OBJECT_ID]);
 
   const handleQuickFlip = async () => {
     if (!currentAccount) {
@@ -346,6 +428,30 @@ export default function Home() {
                     <div className="text-3xl font-light text-czar-gold font-mono">
                       {(parseFloat(betAmount || '0') * 1.96).toFixed(3)} SUI
                     </div>
+                  </div>
+
+                  {/* House Balance & Funding */}
+                  <div className="text-center py-4 border-t border-gray-100">
+                    <div className="text-sm text-gray-500 uppercase tracking-widest mb-2">
+                      House Balance
+                    </div>
+                    <div className={`text-xl font-mono mb-4 ${houseBalance > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                      {houseBalance.toFixed(3)} SUI
+                    </div>
+                    {houseBalance === 0 && (
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div className="space-y-3">
+                          <div className="text-red-600 font-medium text-sm">⚠️ House needs funding to pay winners</div>
+                          <button
+                            onClick={handleFundHouse}
+                            disabled={isFunding}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors text-sm"
+                          >
+                            {isFunding ? 'Funding...' : 'Fund House (1 SUI)'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Flip Button - Masterpiece */}
