@@ -12,18 +12,18 @@ export default function Play() {
     <div className="min-h-screen p-4 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-10 right-20 w-24 h-24 bg-cat-purple/10 rounded-full blur-xl animate-bounce-gentle"></div>
-        <div className="absolute bottom-20 left-16 w-20 h-20 bg-cat-pink/10 rounded-full blur-xl animate-bounce-gentle" style={{animationDelay: '1.5s'}}></div>
-        <div className="absolute top-1/3 right-8 w-16 h-16 bg-cat-blue/10 rounded-full blur-xl animate-bounce-gentle" style={{animationDelay: '0.5s'}}></div>
+        <div className="absolute top-10 right-20 w-24 h-24 bg-brand-orange/10 rounded-full blur-xl animate-bounce-gentle"></div>
+        <div className="absolute bottom-20 left-16 w-20 h-20 bg-brand-coral/10 rounded-full blur-xl animate-bounce-gentle" style={{animationDelay: '1.5s'}}></div>
+        <div className="absolute top-1/3 right-8 w-16 h-16 bg-brand-cream/10 rounded-full blur-xl animate-bounce-gentle" style={{animationDelay: '0.5s'}}></div>
       </div>
 
       <div className="max-w-6xl mx-auto relative z-10">
         <header className="flex flex-col sm:flex-row justify-between items-center mb-12 gap-4">
           <Link 
             href="/"
-            className="group flex items-center gap-3 text-2xl font-bold font-space bg-cat-gradient bg-clip-text text-transparent hover:scale-105 transition-transform duration-300"
+            className="group flex items-center gap-3 text-2xl font-bold font-space bg-brand-gradient bg-clip-text text-transparent hover:scale-105 transition-transform duration-300"
           >
-            <div className="w-8 h-8 bg-cat-gradient rounded-full group-hover:animate-spin-slow"></div>
+            <img src="/logo.svg" alt="Logo" className="w-8 h-8 group-hover:animate-spin-slow" />
             Schrödinger's Box
           </Link>
           

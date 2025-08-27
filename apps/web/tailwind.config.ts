@@ -38,15 +38,20 @@ const config: Config = {
           800: '#86198f',
           900: '#701a75',
         },
-        // Enhanced cat theme
-        'cat-purple': '#8b5cf6',
-        'cat-pink': '#ec4899',
-        'cat-blue': '#3b82f6',
+        // Brand colors from logo
+        'brand-cream': '#FDFBC8',
+        'brand-orange': '#FFB229',
+        'brand-red': '#FF0000',
+        'brand-warm': '#FFF8DC',
+        'brand-peach': '#FFEAA7',
+        'brand-coral': '#FF7675',
+        'brand-brown': '#8B4513',
       },
       backgroundImage: {
         'web3-gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         'neon-gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-        'cat-gradient': 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+        'brand-gradient': 'linear-gradient(135deg, #FFB229 0%, #FDFBC8 50%, #FFEAA7 100%)',
+        'warm-gradient': 'linear-gradient(135deg, #FFF8DC 0%, #FDFBC8 100%)',
         'glass-gradient': 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
       },
       animation: {
@@ -68,8 +73,8 @@ const config: Config = {
           '100%': { transform: 'scale(1) rotate(360deg)', opacity: '1' },
         },
         glowPulse: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)' },
-          '50%': { boxShadow: '0 0 40px rgba(139, 92, 246, 0.6), 0 0 60px rgba(139, 92, 246, 0.4)' },
+          '0%, 100%': { boxShadow: '0 0 20px rgba(255, 178, 41, 0.3)' },
+          '50%': { boxShadow: '0 0 40px rgba(255, 178, 41, 0.6), 0 0 60px rgba(253, 251, 200, 0.4)' },
         },
         slideUp: {
           '0%': { transform: 'translateY(20px)', opacity: '0' },
@@ -81,9 +86,10 @@ const config: Config = {
         },
       },
       boxShadow: {
-        'neon': '0 0 20px rgba(139, 92, 246, 0.4)',
-        'neon-strong': '0 0 40px rgba(139, 92, 246, 0.6)',
+        'brand-glow': '0 0 20px rgba(255, 178, 41, 0.4)',
+        'brand-glow-strong': '0 0 40px rgba(255, 178, 41, 0.6)',
         'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+        'warm-glow': '0 0 30px rgba(253, 251, 200, 0.5)',
       },
       backdropBlur: {
         'xs': '2px',

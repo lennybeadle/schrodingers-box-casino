@@ -112,9 +112,9 @@ export function BetPanel() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Main Game Panel */}
-      <div className="bg-white/40 backdrop-blur-sm rounded-3xl border border-white/20 shadow-glass p-8 hover:shadow-neon-strong transition-all duration-500">
+      <div className="bg-white/40 backdrop-blur-sm rounded-3xl border border-white/20 shadow-glass p-8 hover:shadow-brand-glow-strong transition-all duration-500">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold font-space mb-2 bg-cat-gradient bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold font-space mb-2 bg-brand-gradient bg-clip-text text-transparent">
             Quantum Flip
           </h2>
           <p className="text-slate-600 font-mono text-sm">
@@ -143,7 +143,7 @@ export function BetPanel() {
                   max={maxBet}
                   step="0.001"
                   disabled={isLoading}
-                  className="w-full px-6 py-4 bg-white/60 backdrop-blur-sm border border-white/30 rounded-2xl focus:ring-2 focus:ring-cat-purple focus:border-transparent font-mono text-lg shadow-glass"
+                  className="w-full px-6 py-4 bg-white/60 backdrop-blur-sm border border-white/30 rounded-2xl focus:ring-2 focus:ring-brand-orange focus:border-transparent font-mono text-lg shadow-glass"
                   placeholder="0.000"
                 />
                 <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-500 font-mono font-semibold">
@@ -159,7 +159,7 @@ export function BetPanel() {
             <button
               onClick={handleBet}
               disabled={isLoading || !publicKey}
-              className="group relative w-full py-6 bg-cat-gradient text-white rounded-2xl font-bold font-space text-xl hover:shadow-neon-strong transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+              className="group relative w-full py-6 bg-brand-gradient text-white rounded-2xl font-bold font-space text-xl hover:shadow-brand-glow-strong transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
             >
               <span className="relative z-10 flex items-center justify-center gap-3">
                 {isLoading ? (
@@ -176,7 +176,7 @@ export function BetPanel() {
                   </>
                 )}
               </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-cat-pink to-cat-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-brand-coral to-brand-orange opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
           </div>
 
@@ -185,7 +185,7 @@ export function BetPanel() {
             <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/30 shadow-glass">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-slate-600 font-space font-medium">Potential Payout:</span>
-                <span className="font-bold font-mono text-2xl bg-cat-gradient bg-clip-text text-transparent">
+                <span className="font-bold font-mono text-2xl bg-brand-gradient bg-clip-text text-transparent">
                   {lamportsToSol(potentialPayout).toFixed(4)} SOL
                 </span>
               </div>
@@ -205,10 +205,10 @@ export function BetPanel() {
             <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/30 shadow-glass">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-slate-600 font-space font-medium">Win Probability:</span>
-                <span className="font-bold font-mono text-cat-purple">50.00%</span>
+                <span className="font-bold font-mono text-brand-orange">50.00%</span>
               </div>
               <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                <div className="w-1/2 bg-cat-gradient h-full rounded-full"></div>
+                <div className="w-1/2 bg-brand-gradient h-full rounded-full"></div>
               </div>
             </div>
           </div>
@@ -233,7 +233,7 @@ export function BetPanel() {
               href={txLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-cat-purple hover:text-cat-pink underline text-sm"
+              className="text-brand-orange hover:text-brand-coral underline text-sm"
             >
               View Transaction
             </a>

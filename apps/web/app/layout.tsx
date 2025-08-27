@@ -21,7 +21,7 @@ export default function RootLayout({
           rel="stylesheet" 
         />
       </head>
-      <body className="bg-gradient-to-br from-slate-50 via-purple-50/30 to-blue-50/50 min-h-screen font-space text-slate-900">
+      <body className="bg-gradient-to-br from-brand-warm via-brand-cream/50 to-brand-peach/30 min-h-screen font-space text-slate-900">
         <WalletContextProvider>
           {children}
         </WalletContextProvider>
