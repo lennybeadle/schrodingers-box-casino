@@ -67,36 +67,45 @@ export default function Home() {
         sender: currentAccount.address
       });
       
+      // Execute transaction using the hook with proper error handling
+      console.log('About to sign transaction...');
+      
       const result = await new Promise((resolve, reject) => {
-        signAndExecuteTransaction(
-          {
-            transaction: txb,
-          },
-          {
-            onSuccess: async (data) => {
-              console.log('Transaction success:', data);
-              
-              // Fetch transaction details with effects and events
-              try {
-                const txDetails = await suiClient.getTransactionBlock({
-                  digest: data.digest,
-                  options: {
-                    showEffects: true,
-                    showEvents: true,
-                  },
-                });
-                resolve(txDetails);
-              } catch (error) {
-                console.error('Error fetching transaction details:', error);
-                resolve(data);
-              }
-            },
-            onError: (error) => {
-              console.error('Transaction error:', error);
-              reject(error);
-            },
-          }
-        );
+        try {
+          signAndExecuteTransaction(
+            { transaction: txb },
+            {
+              onSuccess: async (data) => {
+                console.log('Transaction signed successfully:', data);
+                
+                // Fetch full transaction details
+                try {
+                  const txDetails = await suiClient.getTransactionBlock({
+                    digest: data.digest,
+                    options: {
+                      showEffects: true,
+                      showEvents: true,
+                    },
+                  });
+                  console.log('Transaction details:', txDetails);
+                  resolve(txDetails);
+                } catch (fetchError) {
+                  console.error('Error fetching transaction details:', fetchError);
+                  // Still resolve with basic data
+                  resolve(data);
+                }
+              },
+              onError: (error) => {
+                console.error('Transaction signing failed:', error);
+                console.error('Error details:', JSON.stringify(error, null, 2));
+                reject(error);
+              },
+            }
+          );
+        } catch (syncError) {
+          console.error('Synchronous error in transaction execution:', syncError);
+          reject(syncError);
+        }
       }) as any;
 
       // Parse events to get bet result
