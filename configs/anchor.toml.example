@@ -1,0 +1,31 @@
+[features]
+seeds = false
+skip-lint = false
+
+[programs.localnet]
+catflip = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+
+[programs.devnet] 
+catflip = "YOUR_DEPLOYED_PROGRAM_ID_HERE"
+
+[programs.mainnet-beta]
+catflip = "YOUR_MAINNET_PROGRAM_ID_HERE"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "Devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+initialize = "anchor run fund_vault 10"
+fund_vault = "ts-node scripts/fund_vault.ts"
+place_bet = "ts-node scripts/place_bet.ts"
+read_stats = "ts-node scripts/read_stats.ts"
+
+# Example usage:
+# anchor run fund_vault 5.0    # Fund vault with 5 SOL
+# anchor run place_bet 0.1     # Place 0.1 SOL bet  
+# anchor run read_stats        # View casino statistics

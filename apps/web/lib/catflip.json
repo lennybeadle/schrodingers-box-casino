@@ -1,0 +1,163 @@
+{
+  "version": "0.1.0",
+  "name": "catflip",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "minBetLamports", "type": "u64" },
+        { "name": "maxExposureBps", "type": "u16" },
+        { "name": "houseEdgeBps", "type": "u16" }
+      ]
+    },
+    {
+      "name": "fundVault",
+      "accounts": [
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "amount", "type": "u64" }]
+    },
+    {
+      "name": "bet",
+      "accounts": [
+        { "name": "player", "isMut": true, "isSigner": true },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "betRound", "isMut": true, "isSigner": false },
+        { "name": "vrf", "isMut": true, "isSigner": false },
+        { "name": "oracleQueue", "isMut": false, "isSigner": false },
+        { "name": "queueAuthority", "isMut": false, "isSigner": false },
+        { "name": "dataBuffer", "isMut": false, "isSigner": false },
+        { "name": "permission", "isMut": false, "isSigner": false },
+        { "name": "escrow", "isMut": true, "isSigner": false },
+        { "name": "payerWallet", "isMut": true, "isSigner": false },
+        { "name": "payerAuthority", "isMut": false, "isSigner": false },
+        { "name": "recentBlockhashes", "isMut": false, "isSigner": false },
+        { "name": "programState", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false },
+        { "name": "switchboardProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "amountLamports", "type": "u64" }]
+    },
+    {
+      "name": "fulfillRandomness",
+      "accounts": [
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "betRound", "isMut": true, "isSigner": false },
+        { "name": "player", "isMut": true, "isSigner": false },
+        { "name": "vrf", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "refundTimeout",
+      "accounts": [
+        { "name": "player", "isMut": true, "isSigner": true },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "betRound", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "setPause",
+      "accounts": [
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "vault", "isMut": true, "isSigner": false }
+      ],
+      "args": [{ "name": "isPaused", "type": "bool" }]
+    },
+    {
+      "name": "setLimits",
+      "accounts": [
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "vault", "isMut": true, "isSigner": false }
+      ],
+      "args": [
+        { "name": "minBetLamports", "type": "u64" },
+        { "name": "maxExposureBps", "type": "u16" }
+      ]
+    },
+    {
+      "name": "setEdge",
+      "accounts": [
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "vault", "isMut": true, "isSigner": false }
+      ],
+      "args": [{ "name": "houseEdgeBps", "type": "u16" }]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Vault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "authority", "type": "publicKey" },
+          { "name": "bump", "type": "u8" },
+          { "name": "isPaused", "type": "bool" },
+          { "name": "minBetLamports", "type": "u64" },
+          { "name": "maxExposureBps", "type": "u16" },
+          { "name": "houseEdgeBps", "type": "u16" },
+          { "name": "totalVolume", "type": "u64" },
+          { "name": "totalBets", "type": "u64" },
+          { "name": "totalWins", "type": "u64" }
+        ]
+      }
+    },
+    {
+      "name": "BetRound",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "player", "type": "publicKey" },
+          { "name": "stakeLamports", "type": "u64" },
+          { "name": "potentialPayout", "type": "u64" },
+          { "name": "timestamp", "type": "i64" },
+          { "name": "slot", "type": "u64" },
+          { "name": "vrfRequestRandomness", "type": { "array": ["u8", 32] } },
+          { "name": "isSettled", "type": "bool" },
+          { "name": "isWinner", "type": "bool" },
+          { "name": "bump", "type": "u8" }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "BetPlaced",
+      "fields": [
+        { "name": "player", "type": "publicKey" },
+        { "name": "stake", "type": "u64" },
+        { "name": "roundPubkey", "type": "publicKey" },
+        { "name": "timestamp", "type": "i64" }
+      ]
+    },
+    {
+      "name": "BetSettled",
+      "fields": [
+        { "name": "player", "type": "publicKey" },
+        { "name": "stake", "type": "u64" },
+        { "name": "isWinner", "type": "bool" },
+        { "name": "payout", "type": "u64" },
+        { "name": "timestamp", "type": "i64" }
+      ]
+    },
+    {
+      "name": "BetRefunded",
+      "fields": [
+        { "name": "player", "type": "publicKey" },
+        { "name": "stake", "type": "u64" },
+        { "name": "timestamp", "type": "i64" }
+      ]
+    }
+  ]
+}
