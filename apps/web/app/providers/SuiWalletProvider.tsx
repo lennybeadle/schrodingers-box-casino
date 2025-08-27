@@ -13,9 +13,11 @@ const queryClient = new QueryClient();
 
 
 export function SuiWalletProvider({ children }: { children: React.ReactNode }) {
+  const defaultNetwork = (process.env.NEXT_PUBLIC_SUI_NETWORK || 'testnet') as 'testnet' | 'mainnet';
+  
   return (
     <QueryClientProvider client={queryClient}>
-      <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
+      <SuiClientProvider networks={networkConfig} defaultNetwork={defaultNetwork}>
         <WalletProvider>
           {children}
         </WalletProvider>
