@@ -32,6 +32,17 @@ export default function Home() {
       const amountSui = parseFloat(betAmount);
       const amountMist = Math.floor(amountSui * 1_000_000_000);
 
+      // Check wallet balance first
+      console.log('Checking wallet balance...');
+      const balance = await suiClient.getBalance({
+        owner: currentAccount.address,
+      });
+      console.log('Wallet balance:', parseInt(balance.totalBalance) / 1_000_000_000, 'SUI');
+
+      if (parseInt(balance.totalBalance) < amountMist) {
+        throw new Error(`Insufficient SUI balance. You have ${(parseInt(balance.totalBalance) / 1_000_000_000).toFixed(3)} SUI but need ${amountSui} SUI + gas fees.`);
+      }
+
       // Create transaction
       const txb = new Transaction();
       
@@ -60,7 +71,6 @@ export default function Home() {
         signAndExecuteTransaction(
           {
             transaction: txb,
-            chain: 'sui:mainnet',
           },
           {
             onSuccess: async (data) => {
