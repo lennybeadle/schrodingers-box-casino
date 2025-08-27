@@ -1,8 +1,14 @@
 {
-  "buildCommand": "next build",
+  "version": 2,
+  "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "installCommand": "npm install",
   "framework": "nextjs",
+  "functions": {
+    "app/**": {
+      "includeFiles": "app/**"
+    }
+  },
   "env": {
     "NEXT_PUBLIC_SOLANA_CLUSTER": "devnet",
     "NEXT_PUBLIC_RPC_HTTP_URL": "https://api.devnet.solana.com",
