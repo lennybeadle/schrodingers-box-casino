@@ -119,76 +119,51 @@ export default function Home() {
       const balance = await suiClient.getBalance({
         owner: currentAccount.address,
       });
-      console.log('Wallet balance:', parseInt(balance.totalBalance) / 1_000_000_000, 'SUI');
 
-      if (parseInt(balance.totalBalance) < amountMist) {
-        throw new Error(`Insufficient SUI balance. You have ${(parseInt(balance.totalBalance) / 1_000_000_000).toFixed(3)} SUI but need ${amountSui} SUI + gas fees.`);
+      const balanceSui = parseInt(balance.totalBalance) / 1_000_000_000;
+      console.log('Wallet balance:', balanceSui, 'SUI');
+
+      if (balanceSui < amountSui) {
+        throw new Error(`Insufficient balance. You have ${balanceSui} SUI, need ${amountSui} SUI`);
       }
 
       // Create transaction
+      console.log('Creating transaction...');
       const txb = new Transaction();
-      
-      // Split coin for bet
       const [coin] = txb.splitCoins(txb.gas, [amountMist]);
       
-      // Call place_bet function
+      console.log('Package ID:', PACKAGE_ID);
+      console.log('House Object ID:', HOUSE_OBJECT_ID);
+      console.log('Bet Amount (MIST):', amountMist);
+
       txb.moveCall({
         target: `${PACKAGE_ID}::casino::place_bet`,
         arguments: [
-          txb.object(HOUSE_OBJECT_ID), // house
-          coin, // payment
-          txb.object('0x8'), // random object
+          txb.object(HOUSE_OBJECT_ID),
+          coin,
+          txb.object('0x8'),
         ],
       });
 
-      // Execute transaction
-      console.log('Executing transaction:', {
-        packageId: PACKAGE_ID,
-        houseId: HOUSE_OBJECT_ID,
-        amount: amountMist,
-        sender: currentAccount.address
+      console.log('Executing transaction...');
+
+      const result = await new Promise<any>((resolve, reject) => {
+        signAndExecuteTransaction(
+          { transaction: txb },
+          {
+            onSuccess: (data) => {
+              console.log('Transaction successful:', data);
+              resolve(data);
+            },
+            onError: (error) => {
+              console.error('Transaction failed:', error);
+              reject(error);
+            },
+          }
+        );
       });
-      
-      // Execute transaction using the hook with proper error handling
-      console.log('About to sign transaction...');
-      
-      const result = await new Promise((resolve, reject) => {
-        try {
-          signAndExecuteTransaction(
-            { transaction: txb },
-            {
-              onSuccess: async (data) => {
-                console.log('Transaction signed successfully:', data);
-                
-                // Fetch full transaction details
-                try {
-                  const txDetails = await suiClient.getTransactionBlock({
-                    digest: data.digest,
-                    options: {
-                      showEffects: true,
-                      showEvents: true,
-                    },
-                  });
-                  console.log('Transaction details:', txDetails);
-                  resolve(txDetails);
-                } catch (fetchError) {
-                  console.error('Error fetching transaction details:', fetchError);
-                  // Still resolve with basic data
-                  resolve(data);
-                }
-              },
-              onError: (error) => {
-                console.error('Transaction signing failed:', error);
-                console.error('Error details:', JSON.stringify(error, null, 2));
-                reject(error);
-              },
-            }
-          );
-        } catch (syncError) {
-          console.error('Synchronous error in transaction execution:', syncError);
-          reject(syncError);
-        }
-      }) as any;
+
+      console.log('Transaction result:', result);
 
       // Parse events to get bet result
       let isWinner = false;
@@ -270,37 +245,26 @@ export default function Home() {
       {/* Navigation Header */}
       <nav className="relative z-50 px-6 py-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <img src="/logo.svg" alt="CATSINO" className="w-10 h-10 animate-caesar-float" />
-            <div>
-              <h1 className="text-2xl font-bold bg-caesar-gradient bg-clip-text text-transparent">CATSINO</h1>
-              <p className="text-xs text-gray-500 font-mono">$CZAR TOKEN</p>
+          <div className="flex items-center space-x-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-czar-gold to-caesar-bronze rounded-sm"></div>
+              <span className="font-light text-xl tracking-wide text-gray-900">
+                CatsinofunSui
+              </span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-6">
-            <Link 
-              href="https://www.youtube.com/@catsinofun" 
-              target="_blank" 
-              className="text-gray-600 hover:text-czar-gold transition-colors duration-200 flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-              </svg>
-              <span className="hidden sm:inline text-sm">YouTube</span>
-            </Link>
             <SuiWalletButton />
           </div>
         </div>
       </nav>
 
-      {/* Hero Section - Ultra Minimalist */}
       <main className="relative">
         {!currentAccount ? (
-          /* Welcome State - Exceptional Minimalism */
+          /* Welcome State */
           <div className="min-h-screen flex items-center justify-center px-6">
             <div className="max-w-4xl mx-auto text-center space-y-16">
-              {/* Floating Caesar Portrait */}
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-caesar-gold/10 via-caesar-cream/5 to-czar-bronze/10 rounded-full blur-3xl animate-pulse"></div>
                 <div className="relative">
@@ -312,37 +276,24 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Elegant Typography */}
-              <div className="space-y-8">
-                <div className="space-y-4">
-                  <h1 className="text-8xl md:text-9xl font-thin tracking-tight text-gray-900">
-                    CATSINO
+              <div className="space-y-12">
+                <div className="space-y-6">
+                  <h1 className="text-6xl font-thin text-gray-900 tracking-tight leading-tight">
+                    Imperial Gaming<br/>
+                    <span className="bg-gradient-to-r from-czar-gold via-caesar-gold to-czar-bronze bg-clip-text text-transparent">
+                      Perfection
+                    </span>
                   </h1>
+                  
                   <div className="w-24 h-px bg-gradient-to-r from-transparent via-czar-gold to-transparent mx-auto"></div>
-                  <p className="text-xl text-gray-500 font-light max-w-lg mx-auto leading-relaxed">
-                    Honor Emperor Caesar through the art of quantum chance
+                  
+                  <p className="text-lg text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
+                    Where quantum mechanics meets imperial elegance. 
+                    <br className="hidden sm:block" />
+                    Each flip determines Caesar's fate in the digital realm.
                   </p>
                 </div>
 
-                {/* Minimal Stats */}
-                <div className="flex items-center justify-center gap-12 text-sm text-gray-400 font-mono">
-                  <div className="text-center">
-                    <div className="text-2xl font-light text-czar-gold mb-1">50%</div>
-                    <div className="text-xs uppercase tracking-widest">Fair Odds</div>
-                  </div>
-                  <div className="w-px h-12 bg-gray-200"></div>
-                  <div className="text-center">
-                    <div className="text-2xl font-light text-czar-bronze mb-1">$CZAR</div>
-                    <div className="text-xs uppercase tracking-widest">Token</div>
-                  </div>
-                  <div className="w-px h-12 bg-gray-200"></div>
-                  <div className="text-center">
-                    <div className="text-2xl font-light text-czar-silver mb-1">∞</div>
-                    <div className="text-xs uppercase tracking-widest">Legacy</div>
-                  </div>
-                </div>
-
-                {/* Elegant Connect */}
                 <div className="pt-8 space-y-8">
                   <SuiWalletButton />
                   <p className="text-xs text-gray-400 font-mono">
@@ -351,10 +302,9 @@ export default function Home() {
                 </div>
               </div>
             </div>
-
           </div>
         ) : (
-          /* Game State - Pure Gaming Elegance */
+          /* Game State */
           <div className="min-h-screen flex items-center justify-center px-6">
             <div className="max-w-6xl mx-auto">
               <div className="grid lg:grid-cols-5 gap-16 items-center">
@@ -393,18 +343,18 @@ export default function Home() {
                   <div className="w-px h-96 bg-gradient-to-b from-transparent via-gray-200 to-transparent mx-auto"></div>
                 </div>
 
-                {/* Right - Pure Game Interface */}
-                <div className="lg:col-span-2 space-y-8">
+                {/* Right - The Interface */}
+                <div className="lg:col-span-2 space-y-12">
                   
-                  {/* Bet Input - Minimal Perfection */}
-                  <div className="space-y-4">
+                  {/* Bet Input - Architectural Beauty */}
+                  <div className="space-y-8">
                     <div className="text-center">
-                      <label className="text-sm font-medium text-gray-600 uppercase tracking-widest">
-                        Stake Amount
-                      </label>
+                      <h3 className="text-2xl font-thin text-gray-700 mb-2">Wager</h3>
+                      <div className="w-12 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
                     </div>
+                    
                     <div className="relative">
-                      <input
+                      <input 
                         type="number"
                         value={betAmount}
                         onChange={(e) => setBetAmount(e.target.value)}
@@ -454,7 +404,7 @@ export default function Home() {
                     )}
                   </div>
 
-                  {/* Flip Button - Masterpiece */}
+                  {/* Flip Button */}
                   <div className="space-y-6">
                     <button 
                       onClick={handleQuickFlip}
@@ -477,7 +427,7 @@ export default function Home() {
                       </span>
                     </button>
 
-                    {/* Result - Zen Simplicity */}
+                    {/* Result */}
                     {lastResult && (
                       <div className="text-center py-8 space-y-4 animate-in fade-in duration-1000">
                         <div className="text-6xl">
@@ -511,10 +461,10 @@ export default function Home() {
                     {/* Advanced Link */}
                     <div className="text-center pt-4">
                       <Link 
-                        href="/play"
-                        className="text-sm text-gray-400 hover:text-czar-gold transition-colors duration-300 uppercase tracking-widest"
+                        href="/play" 
+                        className="text-sm text-gray-400 hover:text-czar-gold transition-colors duration-300 font-mono tracking-wide"
                       >
-                        Advanced Interface
+                        Advanced Interface →
                       </Link>
                     </div>
                   </div>
@@ -524,81 +474,30 @@ export default function Home() {
           </div>
         )}
 
-        {/* Ethereal Legacy Section - Whisper Minimalism */}
-        <div className="py-32 px-6">
-          <div className="max-w-3xl mx-auto text-center space-y-20">
-            {/* Minimal Divider */}
+        {/* Footer - Minimalist Tribute */}
+        <footer className="absolute bottom-0 left-0 right-0 px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center space-y-6">
             <div className="w-16 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
             
-            {/* Legend Whisper */}
-            <div className="space-y-12">
-              <h2 className="text-3xl font-thin text-gray-800 tracking-wide">
-                The Emperor's Eternal Game
-              </h2>
-              
-              <div className="grid md:grid-cols-3 gap-16 mt-20">
-                <div className="text-center space-y-6">
-                  <div className="text-5xl opacity-40">👑</div>
-                  <div className="space-y-3">
-                    <h3 className="text-sm uppercase tracking-widest text-gray-600 font-light">Reign</h3>
-                    <p className="text-gray-500 text-sm leading-relaxed font-light">
-                      Digital sovereignty through wisdom
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="text-center space-y-6">
-                  <div className="text-5xl opacity-40">⚡</div>
-                  <div className="space-y-3">
-                    <h3 className="text-sm uppercase tracking-widest text-gray-600 font-light">Quantum</h3>
-                    <p className="text-gray-500 text-sm leading-relaxed font-light">
-                      Existing in all possibilities
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="text-center space-y-6">
-                  <div className="text-5xl opacity-40">∞</div>
-                  <div className="space-y-3">
-                    <h3 className="text-sm uppercase tracking-widest text-gray-600 font-light">Legacy</h3>
-                    <p className="text-gray-500 text-sm leading-relaxed font-light">
-                      $CZAR preserves the memory
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Ultra-Minimal Footer */}
-        <footer className="border-t border-gray-100 py-16">
-          <div className="max-w-4xl mx-auto px-6 text-center space-y-8">
-            <div className="opacity-60">
-              <img src="/logo.svg" alt="Caesar" className="w-6 h-6 mx-auto opacity-50" />
-            </div>
+            <p className="text-xs text-gray-400 font-mono tracking-wider">
+              In Memoriam Caesar • $CZAR
+            </p>
             
-            <div className="space-y-4">
-              <p className="text-xs text-gray-400 font-mono tracking-wider uppercase">
-                In Memoriam Caesar • $CZAR
-              </p>
-              
-              <div className="flex items-center justify-center gap-8 text-xs">
-                <Link 
-                  href="https://www.youtube.com/@catsinofun" 
-                  target="_blank" 
-                  className="text-gray-400 hover:text-czar-gold transition-colors duration-300 font-mono tracking-wide"
-                >
-                  YouTube
-                </Link>
-                <div className="w-px h-3 bg-gray-200"></div>
-                <Link 
-                  href="/play" 
-                  className="text-gray-400 hover:text-czar-gold transition-colors duration-300 font-mono tracking-wide"
-                >
-                  Advanced
-                </Link>
-              </div>
+            <div className="flex items-center justify-center gap-8 text-xs">
+              <Link 
+                href="https://www.youtube.com/@catsinofun" 
+                target="_blank" 
+                className="text-gray-400 hover:text-czar-gold transition-colors duration-300 font-mono tracking-wide"
+              >
+                YouTube
+              </Link>
+              <div className="w-px h-3 bg-gray-200"></div>
+              <Link 
+                href="/play" 
+                className="text-gray-400 hover:text-czar-gold transition-colors duration-300 font-mono tracking-wide"
+              >
+                Advanced
+              </Link>
             </div>
           </div>
         </footer>
