@@ -60,15 +60,26 @@ export default function Home() {
         signAndExecuteTransaction(
           {
             transaction: txb,
-            options: {
-              showEffects: true,
-              showEvents: true,
-            },
+            chain: 'sui:mainnet',
           },
           {
-            onSuccess: (data) => {
+            onSuccess: async (data) => {
               console.log('Transaction success:', data);
-              resolve(data);
+              
+              // Fetch transaction details with effects and events
+              try {
+                const txDetails = await suiClient.getTransactionBlock({
+                  digest: data.digest,
+                  options: {
+                    showEffects: true,
+                    showEvents: true,
+                  },
+                });
+                resolve(txDetails);
+              } catch (error) {
+                console.error('Error fetching transaction details:', error);
+                resolve(data);
+              }
             },
             onError: (error) => {
               console.error('Transaction error:', error);
