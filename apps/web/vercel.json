@@ -1,0 +1,15 @@
+{
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "env": {
+    "NEXT_PUBLIC_SOLANA_CLUSTER": "devnet",
+    "NEXT_PUBLIC_RPC_HTTP_URL": "https://api.devnet.solana.com",
+    "NEXT_PUBLIC_RPC_WSS_URL": "wss://api.devnet.solana.com",
+    "NEXT_PUBLIC_PROGRAM_ID": "6AjouDKGuGBxq7w78m7DrtdZYw2Q2ZkH85AdkDBzaACt",
+    "NEXT_PUBLIC_MIN_BET_LAMPORTS": "1000000",
+    "NEXT_PUBLIC_MAX_EXPOSURE_BPS": "1000",
+    "NEXT_PUBLIC_HOUSE_EDGE_BPS": "200"
+  }
+}

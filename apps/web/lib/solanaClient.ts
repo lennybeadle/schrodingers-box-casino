@@ -1,8 +1,24 @@
 import { Connection, PublicKey, Commitment } from '@solana/web3.js';
 
 export const CLUSTER = process.env.NEXT_PUBLIC_SOLANA_CLUSTER || 'devnet';
-export const RPC_URL = process.env.NEXT_PUBLIC_RPC_HTTP_URL || 'https://api.devnet.solana.com';
-export const WS_URL = process.env.NEXT_PUBLIC_RPC_WSS_URL || 'wss://api.devnet.solana.com';
+
+// For NOWNodes, we need to include the API key in the URL
+const API_KEY = process.env.NEXT_PUBLIC_NOWNODES_API_KEY || process.env.NOWNODES_API_KEY;
+const BASE_RPC_URL = process.env.NEXT_PUBLIC_RPC_HTTP_URL || 'https://api.devnet.solana.com';
+const BASE_WS_URL = process.env.NEXT_PUBLIC_RPC_WSS_URL || 'wss://api.devnet.solana.com';
+
+// Construct URLs with API key if using NOWNodes, fallback to public devnet
+export const RPC_URL = BASE_RPC_URL.includes('nownodes.io') && API_KEY
+  ? `${BASE_RPC_URL}/${API_KEY}`
+  : BASE_RPC_URL === 'https://sol.nownodes.io' 
+    ? 'https://api.devnet.solana.com' // Fallback to public devnet if NOWNodes fails
+    : BASE_RPC_URL;
+
+export const WS_URL = BASE_WS_URL.includes('nownodes.io') && API_KEY
+  ? BASE_WS_URL // WS URL already has the API key in the path
+  : BASE_WS_URL.includes('sol.nownodes.io')
+    ? 'wss://api.devnet.solana.com' // Fallback to public devnet
+    : BASE_WS_URL;
 
 export const connection = new Connection(RPC_URL, {
   commitment: 'confirmed' as Commitment,
@@ -10,7 +26,7 @@ export const connection = new Connection(RPC_URL, {
 });
 
 export const PROGRAM_ID = new PublicKey(
-  process.env.NEXT_PUBLIC_PROGRAM_ID || 'Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS'
+  process.env.NEXT_PUBLIC_PROGRAM_ID || '8bG8NieUJjFAi3vSKd6CdXQmfwVKqcZhe7CaGpo87gGh'
 );
 
 export const MIN_BET_LAMPORTS = parseInt(

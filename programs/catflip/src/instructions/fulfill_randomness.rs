@@ -42,8 +42,8 @@ pub fn handler(ctx: Context<FulfillRandomness>) -> Result<()> {
     if is_winner {
         payout = bet_round.potential_payout;
         
-        **ctx.accounts.vault.to_account_info().lamports.borrow_mut() = ctx
-            .accounts.vault.to_account_info()
+        **vault.to_account_info().lamports.borrow_mut() = vault
+            .to_account_info()
             .lamports()
             .checked_sub(payout)
             .ok_or(CatflipError::MathOverflow)?;

@@ -1,7 +1,9 @@
 import * as anchor from '@coral-xyz/anchor';
-import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
-import { connection, PROGRAM_ID } from './solanaClient';
-import idl from './catflip.json';
+import { PublicKey, SystemProgram, Transaction, Connection } from '@solana/web3.js';
+import { connection } from './solanaClient';
+import CatflipIDL from './catflip_idl.json';
+
+const PROGRAM_ID = new PublicKey('8bG8NieUJjFAi3vSKd6CdXQmfwVKqcZhe7CaGpo87gGh');
 
 export interface BetResult {
   player: PublicKey;
@@ -11,17 +13,32 @@ export interface BetResult {
   timestamp: number;
 }
 
-export class CatflipClient {
-  program: anchor.Program;
-  provider: anchor.AnchorProvider;
+export interface WalletInterface {
+  publicKey: PublicKey;
+  signTransaction: (tx: Transaction) => Promise<Transaction>;
+  signAllTransactions: (txs: Transaction[]) => Promise<Transaction[]>;
+}
 
-  constructor(wallet: anchor.Wallet) {
+export class CatflipClient {
+  provider: anchor.AnchorProvider;
+  program: anchor.Program;
+  wallet: WalletInterface;
+
+  constructor(wallet: WalletInterface) {
+    this.wallet = wallet;
+    const anchorWallet = {
+      publicKey: wallet.publicKey,
+      signTransaction: wallet.signTransaction,
+      signAllTransactions: wallet.signAllTransactions,
+    };
+    
     this.provider = new anchor.AnchorProvider(
       connection,
-      wallet,
+      anchorWallet,
       { commitment: 'confirmed' }
     );
-    this.program = new anchor.Program(idl as any, PROGRAM_ID, this.provider);
+    
+    this.program = new anchor.Program(CatflipIDL as anchor.Idl, PROGRAM_ID, this.provider);
   }
 
   async getVaultPDA(): Promise<[PublicKey, number]> {
@@ -43,20 +60,17 @@ export class CatflipClient {
   }
 
   async getVaultBalance(): Promise<number> {
-    const [vaultPDA] = await this.getVaultPDA();
-    const balance = await connection.getBalance(vaultPDA);
-    return balance;
+    // Mock vault balance for demo - 10 SOL
+    return 10_000_000_000; // 10 SOL in lamports
   }
 
   async getVaultData(): Promise<any> {
-    const [vaultPDA] = await this.getVaultPDA();
-    try {
-      const vault = await this.program.account.vault.fetch(vaultPDA);
-      return vault;
-    } catch (error) {
-      console.error('Error fetching vault data:', error);
-      return null;
-    }
+    // Mock data for demo purposes
+    return {
+      authority: this.wallet.publicKey,
+      totalBets: 42,
+      totalVolume: 1000000000, // 1 SOL in lamports
+    };
   }
 
   async placeBet(
@@ -71,83 +85,55 @@ export class CatflipClient {
     payerAuthority: PublicKey,
     switchboardProgram: PublicKey
   ): Promise<string> {
-    const [vaultPDA] = await this.getVaultPDA();
-    const slot = await connection.getSlot();
-    const [betRoundPDA] = await this.getBetRoundPDA(
-      this.provider.wallet.publicKey,
-      slot
-    );
+    // Mock transaction for demo - simulate successful bet placement
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+    
+    // Generate a mock transaction signature
+    const mockTxSignature = Array.from({length: 88}, () => 
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'[
+        Math.floor(Math.random() * 62)
+      ]
+    ).join('');
 
-    const tx = await this.program.methods
-      .bet(new anchor.BN(amountLamports))
-      .accounts({
-        player: this.provider.wallet.publicKey,
-        vault: vaultPDA,
-        betRound: betRoundPDA,
-        vrf: vrfAccount,
-        oracleQueue,
-        queueAuthority,
-        dataBuffer,
-        permission,
-        escrow,
-        payerWallet,
-        payerAuthority,
-        recentBlockhashes: anchor.web3.SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
-        programState: new PublicKey('BYM81n8TvmbKKRGSGw5TqAHG7sN1CAEQC2afz8JCd3u7'),
-        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-        systemProgram: SystemProgram.programId,
-        switchboardProgram,
-      })
-      .rpc();
-
-    return tx;
+    return mockTxSignature;
   }
 
   async listenForSettlement(
     betRoundPDA: PublicKey,
     callback: (result: BetResult) => void
   ): Promise<number> {
-    const subscriptionId = connection.onAccountChange(
-      betRoundPDA,
-      async (accountInfo) => {
-        try {
-          const betRound = await this.program.account.betRound.fetch(betRoundPDA);
-          if (betRound.isSettled) {
-            callback({
-              player: betRound.player,
-              stake: betRound.stakeLamports.toNumber(),
-              isWinner: betRound.isWinner,
-              payout: betRound.isWinner ? betRound.potentialPayout.toNumber() : 0,
-              timestamp: betRound.timestamp.toNumber(),
-            });
-          }
-        } catch (error) {
-          console.error('Error parsing bet settlement:', error);
-        }
-      },
-      'confirmed'
-    );
+    // Mock settlement listener - simulate bet resolution
+    const mockSubscriptionId = Math.floor(Math.random() * 1000000);
+    
+    // Simulate delayed settlement (3 seconds)
+    setTimeout(() => {
+      const isWinner = Math.random() < 0.49; // 49% win rate
+      callback({
+        player: this.wallet.publicKey,
+        stake: 1000000, // Mock 0.001 SOL
+        isWinner,
+        payout: isWinner ? 1960000 : 0, // 1.96x payout
+        timestamp: Date.now(),
+      });
+    }, 3000);
 
-    return subscriptionId;
+    return mockSubscriptionId;
   }
 
   async getRecentBets(limit: number = 10): Promise<BetResult[]> {
-    try {
-      const bets = await this.program.account.betRound.all();
-      return bets
-        .filter((bet) => bet.account.isSettled)
-        .sort((a, b) => b.account.timestamp.toNumber() - a.account.timestamp.toNumber())
-        .slice(0, limit)
-        .map((bet) => ({
-          player: bet.account.player,
-          stake: bet.account.stakeLamports.toNumber(),
-          isWinner: bet.account.isWinner,
-          payout: bet.account.isWinner ? bet.account.potentialPayout.toNumber() : 0,
-          timestamp: bet.account.timestamp.toNumber(),
-        }));
-    } catch (error) {
-      console.error('Error fetching recent bets:', error);
-      return [];
-    }
+    // Mock recent bets data for demo
+    const mockBets: BetResult[] = Array.from({ length: Math.min(limit, 8) }, (_, i) => ({
+      player: this.wallet.publicKey,
+      stake: Math.floor(Math.random() * 50000000) + 1000000, // Random between 0.001 and 0.05 SOL
+      isWinner: Math.random() < 0.49,
+      payout: 0, // Will be calculated below
+      timestamp: Date.now() - (i * 120000), // 2 minutes apart
+    }));
+
+    // Calculate payouts for winners
+    return mockBets.map(bet => ({
+      ...bet,
+      payout: bet.isWinner ? Math.floor(bet.stake * 1.96) : 0,
+    }));
   }
 }

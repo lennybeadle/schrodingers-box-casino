@@ -38,20 +38,27 @@ const config: Config = {
           800: '#86198f',
           900: '#701a75',
         },
-        // Brand colors from logo
-        'brand-cream': '#FDFBC8',
-        'brand-orange': '#FFB229',
-        'brand-red': '#FF0000',
-        'brand-warm': '#FFF8DC',
-        'brand-peach': '#FFEAA7',
-        'brand-coral': '#FF7675',
-        'brand-brown': '#8B4513',
+        // CATSINO Caesar Theme - Premium Clean Colors
+        'caesar': {
+          cream: '#FDFBC8',
+          gold: '#FFB229', 
+          red: '#FF0000',
+          brown: '#8B4513',
+          black: '#1a1a1a',
+          gray: '#f8f9fa',
+        },
+        'czar': {
+          gold: '#D4AF37',
+          bronze: '#CD7F32', 
+          silver: '#C0C0C0',
+        },
       },
       backgroundImage: {
         'web3-gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         'neon-gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-        'brand-gradient': 'linear-gradient(135deg, #FFB229 0%, #FDFBC8 50%, #FFEAA7 100%)',
-        'warm-gradient': 'linear-gradient(135deg, #FFF8DC 0%, #FDFBC8 100%)',
+        'caesar-gradient': 'linear-gradient(135deg, #D4AF37 0%, #FFB229 50%, #FDFBC8 100%)',
+        'czar-gradient': 'linear-gradient(90deg, #D4AF37 0%, #CD7F32 100%)',
+        'royal-gradient': 'linear-gradient(135deg, #FFB229 0%, #FDFBC8 100%)',
         'glass-gradient': 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
       },
       animation: {
@@ -61,6 +68,7 @@ const config: Config = {
         'slide-up': 'slideUp 0.5s ease-out forwards',
         'bounce-gentle': 'bounceGentle 2s ease-in-out infinite',
         'spin-slow': 'spin 3s linear infinite',
+        'caesar-float': 'caesarFloat 4s ease-in-out infinite',
       },
       keyframes: {
         floatUp: {
@@ -73,8 +81,13 @@ const config: Config = {
           '100%': { transform: 'scale(1) rotate(360deg)', opacity: '1' },
         },
         glowPulse: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(255, 178, 41, 0.3)' },
-          '50%': { boxShadow: '0 0 40px rgba(255, 178, 41, 0.6), 0 0 60px rgba(253, 251, 200, 0.4)' },
+          '0%, 100%': { boxShadow: '0 0 30px rgba(212, 175, 55, 0.2)' },
+          '50%': { boxShadow: '0 0 60px rgba(212, 175, 55, 0.4), 0 0 90px rgba(255, 178, 41, 0.2)' },
+        },
+        caesarFloat: {
+          '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+          '25%': { transform: 'translateY(-5px) rotate(1deg)' },
+          '75%': { transform: 'translateY(-3px) rotate(-1deg)' },
         },
         slideUp: {
           '0%': { transform: 'translateY(20px)', opacity: '0' },
@@ -86,10 +99,12 @@ const config: Config = {
         },
       },
       boxShadow: {
-        'brand-glow': '0 0 20px rgba(255, 178, 41, 0.4)',
-        'brand-glow-strong': '0 0 40px rgba(255, 178, 41, 0.6)',
-        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
-        'warm-glow': '0 0 30px rgba(253, 251, 200, 0.5)',
+        'caesar-glow': '0 0 25px rgba(212, 175, 55, 0.3)',
+        'caesar-glow-strong': '0 0 50px rgba(212, 175, 55, 0.5)',
+        'czar-glow': '0 0 20px rgba(255, 178, 41, 0.4)',
+        'royal-shadow': '0 4px 20px rgba(0, 0, 0, 0.08)',
+        'clean-shadow': '0 2px 10px rgba(0, 0, 0, 0.05)',
+        'premium-shadow': '0 8px 40px rgba(0, 0, 0, 0.12)',
       },
       backdropBlur: {
         'xs': '2px',

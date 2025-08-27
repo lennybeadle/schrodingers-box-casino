@@ -110,16 +110,22 @@ export function BetPanel() {
   const maxBet = (vaultBalance * 0.1) / 1_000_000_000;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      {/* Main Game Panel */}
-      <div className="bg-white/40 backdrop-blur-sm rounded-3xl border border-white/20 shadow-glass p-8 hover:shadow-brand-glow-strong transition-all duration-500">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold font-space mb-2 bg-brand-gradient bg-clip-text text-transparent">
-            Quantum Flip
-          </h2>
-          <p className="text-slate-600 font-mono text-sm">
-            Observe the cat. Place your bet. Collapse the wave function.
-          </p>
+    <div className="max-w-5xl mx-auto space-y-8">
+      {/* Compact Game Panel */}
+      <div className="bg-white border border-gray-100 p-8 transition-all duration-700 hover:border-gray-200">
+        <div className="text-center mb-10">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <img src="/logo.svg" alt="Caesar" className="w-6 h-6 animate-caesar-float opacity-60" />
+            <div>
+              <h2 className="text-xl font-thin text-gray-800 tracking-wide">
+                Quantum Flip
+              </h2>
+              <p className="text-gray-400 font-mono text-xs tracking-widest uppercase">
+                Emperor's Game
+              </p>
+            </div>
+          </div>
+          <div className="w-12 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
         </div>
         
         <CatAnimation 
@@ -127,13 +133,16 @@ export function BetPanel() {
           isAnimating={isAnimating}
         />
         
-        <div className="grid md:grid-cols-2 gap-8 mt-12">
-          {/* Betting Controls */}
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold font-space text-slate-700 mb-3">
-                Bet Amount
-              </label>
+        <div className="grid lg:grid-cols-5 gap-12 mt-10">
+          {/* Compact Betting Interface */}
+          <div className="lg:col-span-3 space-y-8">
+            {/* Compact Bet Amount */}
+            <div className="space-y-4">
+              <div className="text-center">
+                <label className="text-xs font-mono text-gray-400 uppercase tracking-widest">
+                  Stake Amount
+                </label>
+              </div>
               <div className="relative">
                 <input
                   type="number"
@@ -143,97 +152,139 @@ export function BetPanel() {
                   max={maxBet}
                   step="0.001"
                   disabled={isLoading}
-                  className="w-full px-6 py-4 bg-white/60 backdrop-blur-sm border border-white/30 rounded-2xl focus:ring-2 focus:ring-brand-orange focus:border-transparent font-mono text-lg shadow-glass"
-                  placeholder="0.000"
+                  className="w-full text-center text-3xl font-thin py-6 bg-transparent border-0 border-b border-gray-200 focus:border-czar-gold focus:outline-none focus:ring-0 transition-colors duration-500 font-mono text-gray-800"
+                  placeholder="0.001"
                 />
-                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-500 font-mono font-semibold">
+                <div className="absolute right-0 bottom-2 text-gray-400 font-mono text-base font-light">
                   SOL
                 </div>
               </div>
-              <div className="flex justify-between text-xs font-mono text-slate-500 mt-2">
-                <span>Min: {lamportsToSol(MIN_BET_LAMPORTS)} SOL</span>
-                <span>Max: {maxBet.toFixed(3)} SOL</span>
+              <div className="flex justify-between text-xs font-mono text-gray-400 font-light">
+                <span>Min: {lamportsToSol(MIN_BET_LAMPORTS)}</span>
+                <span>Max: {maxBet.toFixed(3)}</span>
               </div>
             </div>
+
+            {/* Compact Quick Amounts */}
+            <div className="flex justify-center gap-4">
+              {[0.01, 0.05, 0.1, 0.5].map((amount) => (
+                <button
+                  key={amount}
+                  onClick={() => setBetAmount(amount.toString())}
+                  disabled={isLoading}
+                  className="px-3 py-1.5 text-xs font-mono text-gray-400 hover:text-czar-gold transition-colors duration-300 border border-gray-100 hover:border-gray-200"
+                >
+                  {amount}
+                </button>
+              ))}
+            </div>
             
+            {/* Compact Flip Button */}
             <button
               onClick={handleBet}
               disabled={isLoading || !publicKey}
-              className="group relative w-full py-6 bg-brand-gradient text-white rounded-2xl font-bold font-space text-xl hover:shadow-brand-glow-strong transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+              className="group relative w-full py-6 bg-gradient-to-r from-gray-900 via-black to-gray-900 text-white overflow-hidden transition-all duration-700 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.01]"
             >
-              <span className="relative z-10 flex items-center justify-center gap-3">
+              <div className="absolute inset-0 bg-gradient-to-r from-czar-gold via-caesar-gold to-czar-bronze opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              <span className="relative z-10 flex items-center justify-center gap-4 text-lg font-light tracking-widest">
                 {isLoading ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Flipping...
+                    <div className="w-4 h-4 border border-white/30 border-t-white rounded-full animate-spin"></div>
+                    QUANTUM PROCESSING
                   </>
                 ) : (
                   <>
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    Flip the Box
+                    FLIP
                   </>
                 )}
               </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-brand-coral to-brand-orange opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
           </div>
 
-          {/* Payout Info */}
-          <div className="space-y-4">
-            <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/30 shadow-glass">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-slate-600 font-space font-medium">Potential Payout:</span>
-                <span className="font-bold font-mono text-2xl bg-brand-gradient bg-clip-text text-transparent">
-                  {lamportsToSol(potentialPayout).toFixed(4)} SOL
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-4 text-sm font-mono">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">House Edge:</span>
-                  <span className="text-slate-700 font-semibold">{(HOUSE_EDGE_BPS / 100).toFixed(1)}%</span>
+          {/* Compact Sidebar */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Potential Win */}
+            <div className="text-center py-4">
+              <div className="space-y-3">
+                <div className="text-xs text-gray-400 uppercase tracking-widest font-mono">
+                  Potential Win
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Multiplier:</span>
-                  <span className="text-slate-700 font-semibold">1.96x</span>
+                <div className="text-2xl font-thin text-czar-gold font-mono">
+                  {lamportsToSol(potentialPayout).toFixed(4)}
+                </div>
+                <div className="text-xs text-gray-400 font-mono">SOL</div>
+              </div>
+            </div>
+
+            {/* Compact Stats */}
+            <div className="space-y-4 text-center">
+              <div className="w-8 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mx-auto"></div>
+              
+              <div className="grid grid-cols-3 gap-4 text-xs font-mono text-gray-400">
+                <div className="text-center">
+                  <div className="text-base font-light text-czar-gold mb-1">{(HOUSE_EDGE_BPS / 100).toFixed(1)}%</div>
+                  <div className="uppercase tracking-widest text-xs">Edge</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-base font-light text-czar-bronze mb-1">1.96x</div>
+                  <div className="uppercase tracking-widest text-xs">Multiplier</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-base font-light text-czar-silver mb-1">50%</div>
+                  <div className="uppercase tracking-widest text-xs">Win Rate</div>
                 </div>
               </div>
             </div>
 
-            {/* Win Rate Display */}
-            <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/30 shadow-glass">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-slate-600 font-space font-medium">Win Probability:</span>
-                <span className="font-bold font-mono text-brand-orange">50.00%</span>
+            {/* Compact Quantum Probability */}
+            <div className="text-center space-y-3">
+              <div className="text-xs text-gray-400 uppercase tracking-widest font-mono">
+                Quantum State
               </div>
-              <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                <div className="w-1/2 bg-brand-gradient h-full rounded-full"></div>
+              <div className="w-full bg-gray-100 h-1 overflow-hidden">
+                <div className="w-1/2 bg-gradient-to-r from-czar-gold to-czar-bronze h-full"></div>
+              </div>
+              <div className="flex justify-between text-xs text-gray-400 font-mono">
+                <span>0%</span>
+                <span>50%</span>
+                <span>100%</span>
               </div>
             </div>
           </div>
         </div>
         
+        {/* Compact Result */}
         {lastResult && (
-          <div className={`mt-4 p-4 rounded-lg text-center ${
-            lastResult.isWinner ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
-            {lastResult.isWinner ? '✨ Alive!' : '😺 Used a life!'}
-            {lastResult.isWinner && (
-              <div className="text-sm mt-1">
-                Won {lamportsToSol(lastResult.payout).toFixed(4)} SOL
+          <div className="mt-10 text-center animate-in fade-in duration-1000">
+            <div className="space-y-4">
+              <div className="text-4xl opacity-60">
+                {lastResult.isWinner ? '👑' : '⚱️'}
               </div>
-            )}
+              <div className="space-y-2">
+                <div className={`text-lg font-thin tracking-wide ${
+                  lastResult.isWinner ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {lastResult.isWinner ? 'EMPEROR LIVES' : 'EMPEROR FALLS'}
+                </div>
+                {lastResult.isWinner && (
+                  <div className="text-base font-mono text-czar-gold font-light">
+                    +{lamportsToSol(lastResult.payout).toFixed(4)} SOL
+                  </div>
+                )}
+              </div>
+              <div className="w-8 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
+            </div>
           </div>
         )}
         
+        {/* Minimal Transaction Link */}
         {txLink && (
-          <div className="mt-4 text-center">
+          <div className="mt-8 text-center">
             <a
               href={txLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-brand-orange hover:text-brand-coral underline text-sm"
+              className="text-xs font-mono text-gray-400 hover:text-czar-gold transition-colors duration-300 tracking-wide uppercase"
             >
               View Transaction
             </a>
@@ -241,38 +292,61 @@ export function BetPanel() {
         )}
       </div>
       
-      <div className="bg-white rounded-3xl shadow-xl p-8">
-        <h3 className="text-lg font-bold mb-4">Game Stats</h3>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-gray-600">Vault Balance:</span>
-            <span className="ml-2 font-bold">{lamportsToSol(vaultBalance).toFixed(4)} SOL</span>
+      {/* Compact Empire Stats */}
+      <div className="bg-white border border-gray-100 p-6 transition-all duration-700">
+        <div className="text-center space-y-6">
+          <div className="space-y-2">
+            <h3 className="text-base font-thin text-gray-800 tracking-wide">Empire State</h3>
+            <div className="w-8 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
           </div>
-          <div>
-            <span className="text-gray-600">Recent Games:</span>
-            <span className="ml-2 font-bold">{recentBets.length}</span>
-          </div>
-        </div>
-        
-        {recentBets.length > 0 && (
-          <div className="mt-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Recent Results</h4>
-            <div className="flex gap-2 flex-wrap">
-              {recentBets.map((bet, i) => (
-                <span
-                  key={i}
-                  className={`px-2 py-1 rounded-full text-xs ${
-                    bet.isWinner 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}
-                >
-                  {bet.isWinner ? 'W' : 'L'}
-                </span>
-              ))}
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="text-center space-y-2">
+              <div className="text-xs text-gray-400 uppercase tracking-widest font-mono">
+                Treasury Balance
+              </div>
+              <div className="text-xl font-thin text-czar-gold font-mono">
+                {lamportsToSol(vaultBalance).toFixed(4)}
+              </div>
+              <div className="text-xs text-gray-400 font-mono">SOL</div>
+            </div>
+            <div className="text-center space-y-2">
+              <div className="text-xs text-gray-400 uppercase tracking-widest font-mono">
+                Recent Games
+              </div>
+              <div className="text-xl font-thin text-czar-bronze font-mono">
+                {recentBets.length}
+              </div>
+              <div className="text-xs text-gray-400 font-mono">Flips</div>
             </div>
           </div>
-        )}
+          
+          {recentBets.length > 0 && (
+            <div className="space-y-4">
+              <div className="w-6 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mx-auto"></div>
+              
+              <div className="space-y-3">
+                <div className="text-xs text-gray-400 uppercase tracking-widest font-mono">
+                  Battle History
+                </div>
+                <div className="flex justify-center gap-1.5 flex-wrap">
+                  {recentBets.map((bet, i) => (
+                    <div
+                      key={i}
+                      className={`w-5 h-5 text-xs font-mono flex items-center justify-center border transition-colors duration-300 ${
+                        bet.isWinner 
+                          ? 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100' 
+                          : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
+                      }`}
+                    >
+                      {bet.isWinner ? 'W' : 'L'}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

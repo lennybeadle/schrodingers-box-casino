@@ -1,0 +1,21 @@
+[package]
+name = "catflip-minimal"
+version = "0.1.0"
+edition = "2021"
+description = "Ultra-minimal CATSINO betting program"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+solana-program = "1.18.0"
+borsh = "0.10.0"
+thiserror = "1.0"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
+overflow-checks = false

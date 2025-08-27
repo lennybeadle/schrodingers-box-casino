@@ -46,6 +46,9 @@ pub struct Bet<'info> {
 }
 
 pub fn handler(ctx: Context<Bet>, amount_lamports: u64) -> Result<()> {
+    // Get immutable data first
+    let vault_balance = ctx.accounts.vault.to_account_info().lamports();
+    
     let vault = &mut ctx.accounts.vault;
     let bet_round = &mut ctx.accounts.bet_round;
     let clock = Clock::get()?;
@@ -54,8 +57,6 @@ pub fn handler(ctx: Context<Bet>, amount_lamports: u64) -> Result<()> {
         amount_lamports >= vault.min_bet_lamports,
         CatflipError::BetBelowMinimum
     );
-    
-    let vault_balance = ctx.accounts.vault.to_account_info().lamports();
     let max_bet = vault_balance
         .checked_mul(vault.max_exposure_bps as u64)
         .ok_or(CatflipError::MathOverflow)?
@@ -88,7 +89,7 @@ pub fn handler(ctx: Context<Bet>, amount_lamports: u64) -> Result<()> {
             ctx.accounts.system_program.to_account_info(),
             system_program::Transfer {
                 from: ctx.accounts.player.to_account_info(),
-                to: ctx.accounts.vault.to_account_info(),
+                to: vault.to_account_info(),
             },
         ),
         amount_lamports,

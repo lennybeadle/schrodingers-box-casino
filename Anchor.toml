@@ -1,15 +1,15 @@
 [toolchain]
-anchor_version = "0.31.0"
+anchor_version = "0.29.0"
 
 [features]
 seeds = false
 skip-lint = false
 
 [programs.localnet]
-catflip = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+catflip = "8bG8NieUJjFAi3vSKd6CdXQmfwVKqcZhe7CaGpo87gGh"
 
 [programs.devnet]
-catflip = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+catflip = "8bG8NieUJjFAi3vSKd6CdXQmfwVKqcZhe7CaGpo87gGh"
 
 [registry]
 url = "https://api.apr.dev"
