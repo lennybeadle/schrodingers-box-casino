@@ -3,17 +3,24 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { SuiWalletButton } from '@/components/SuiWalletButton';
-import { useWalletKit } from '@mysten/wallet-kit';
-import { CatsinoSuiClient } from '@/lib/suiClient';
+import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
+import { Transaction } from '@mysten/sui/transactions';
 
 export default function Home() {
-  const { isConnected, currentAccount, signAndExecuteTransactionBlock } = useWalletKit();
+  const currentAccount = useCurrentAccount();
+  const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+  const suiClient = useSuiClient();
+
+  // Environment variables
+  const PACKAGE_ID = process.env.NEXT_PUBLIC_PACKAGE_ID || '0x0';
+  const HOUSE_OBJECT_ID = process.env.NEXT_PUBLIC_HOUSE_OBJECT_ID || '0x0';
+  const NETWORK = process.env.NEXT_PUBLIC_SUI_NETWORK || 'testnet';
   const [betAmount, setBetAmount] = useState<string>('0.01');
   const [isPlaying, setIsPlaying] = useState(false);
   const [lastResult, setLastResult] = useState<{ success: boolean; message: string; txUrl?: string; isWinner?: boolean } | null>(null);
 
   const handleQuickFlip = async () => {
-    if (!isConnected || !currentAccount || !signAndExecuteTransactionBlock) {
+    if (!currentAccount) {
       alert('Please connect your Sui wallet first');
       return;
     }
@@ -22,14 +29,99 @@ export default function Home() {
     setLastResult(null);
 
     try {
-      const wallet = { signAndExecuteTransactionBlock, account: currentAccount };
-      const client = new CatsinoSuiClient(wallet);
+      const amountSui = parseFloat(betAmount);
+      const amountMist = Math.floor(amountSui * 1_000_000_000);
+
+      // Create transaction
+      const txb = new Transaction();
       
-      const result = await client.placeBet(parseFloat(betAmount));
+      // Split coin for bet
+      const [coin] = txb.splitCoins(txb.gas, [amountMist]);
+      
+      // Call place_bet function
+      txb.moveCall({
+        target: `${PACKAGE_ID}::casino::place_bet`,
+        arguments: [
+          txb.object(HOUSE_OBJECT_ID), // house
+          coin, // payment
+          txb.object('0x8'), // random object
+        ],
+      });
+
+      // Execute transaction
+      console.log('Executing transaction:', {
+        packageId: PACKAGE_ID,
+        houseId: HOUSE_OBJECT_ID,
+        amount: amountMist,
+        sender: currentAccount.address
+      });
+      
+      const result = await new Promise((resolve, reject) => {
+        signAndExecuteTransaction(
+          {
+            transaction: txb,
+            options: {
+              showEffects: true,
+              showEvents: true,
+            },
+          },
+          {
+            onSuccess: (data) => {
+              console.log('Transaction success:', data);
+              resolve(data);
+            },
+            onError: (error) => {
+              console.error('Transaction error:', error);
+              reject(error);
+            },
+          }
+        );
+      }) as any;
+
+      // Parse events to get bet result
+      let isWinner = false;
+      let payout = 0;
+      let message = 'Bet placed successfully!';
+
+      if (result.events) {
+        for (const event of result.events) {
+          if (event.type.includes('BetPlaced')) {
+            const eventData = event.parsedJson as any;
+            isWinner = eventData.is_winner;
+            payout = parseInt(eventData.payout) / 1_000_000_000; // Convert MIST to SUI
+            const randomValue = eventData.random_value;
+            
+            console.log('Bet result:', {
+              isWinner,
+              payout: eventData.payout,
+              randomValue,
+              winThreshold: 49
+            });
+            
+            message = isWinner 
+              ? `🎉 Caesar Lives! You won ${payout.toFixed(3)} SUI! (Random: ${randomValue})` 
+              : `⚱️ Caesar Falls! You lost. (Random: ${randomValue}, needed ≤ 49)`;
+            break;
+          }
+        }
+      }
+
+      const explorerUrl = NETWORK === 'mainnet' 
+        ? `https://suiexplorer.com/txblock/${result.digest}`
+        : `https://suiexplorer.com/txblock/${result.digest}?network=${NETWORK}`;
+
+      const betResult = {
+        success: true,
+        message,
+        digest: result.digest,
+        txUrl: explorerUrl,
+        isWinner,
+        payout,
+      };
       
       // Wait for flip animation then show result  
       setTimeout(() => {
-        setLastResult(result);
+        setLastResult(betResult);
         setIsPlaying(false);
       }, 3000);
       
@@ -67,7 +159,7 @@ export default function Home() {
           
           <div className="flex items-center gap-6">
             <Link 
-              href="https://youtube.com" 
+              href="https://www.youtube.com/@catsinofun" 
               target="_blank" 
               className="text-gray-600 hover:text-czar-gold transition-colors duration-200 flex items-center gap-2"
             >
@@ -83,7 +175,7 @@ export default function Home() {
 
       {/* Hero Section - Ultra Minimalist */}
       <main className="relative">
-        {!isConnected ? (
+        {!currentAccount ? (
           /* Welcome State - Exceptional Minimalism */
           <div className="min-h-screen flex items-center justify-center px-6">
             <div className="max-w-4xl mx-auto text-center space-y-16">
@@ -130,14 +222,15 @@ export default function Home() {
                 </div>
 
                 {/* Elegant Connect */}
-                <div className="pt-8">
+                <div className="pt-8 space-y-8">
                   <SuiWalletButton />
-                  <p className="text-xs text-gray-400 mt-6 font-mono">
-                    Connect Sui wallet to enter the quantum realm
+                  <p className="text-xs text-gray-400 font-mono">
+                    Connect any Sui wallet to enter the quantum realm
                   </p>
                 </div>
               </div>
             </div>
+
           </div>
         ) : (
           /* Game State - Pure Gaming Elegance */
@@ -201,7 +294,7 @@ export default function Home() {
                         placeholder="0.000"
                       />
                       <div className="absolute right-0 bottom-2 text-gray-400 font-mono text-lg">
-                        SOL
+                        SUI
                       </div>
                     </div>
                   </div>
@@ -212,7 +305,7 @@ export default function Home() {
                       Potential Win
                     </div>
                     <div className="text-3xl font-light text-czar-gold font-mono">
-                      {(parseFloat(betAmount || '0') * 1.96).toFixed(3)} SOL
+                      {(parseFloat(betAmount || '0') * 1.96).toFixed(3)} SUI
                     </div>
                   </div>
 
@@ -220,7 +313,7 @@ export default function Home() {
                   <div className="space-y-6">
                     <button 
                       onClick={handleQuickFlip}
-                      disabled={isPlaying || !isConnected}
+                      disabled={isPlaying || !currentAccount}
                       className="group relative w-full py-8 bg-gradient-to-r from-gray-900 via-black to-gray-900 text-white overflow-hidden transition-all duration-700 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
                       style={{ borderRadius: '2px' }}
                     >
@@ -347,7 +440,7 @@ export default function Home() {
               
               <div className="flex items-center justify-center gap-8 text-xs">
                 <Link 
-                  href="https://youtube.com" 
+                  href="https://www.youtube.com/@catsinofun" 
                   target="_blank" 
                   className="text-gray-400 hover:text-czar-gold transition-colors duration-300 font-mono tracking-wide"
                 >
