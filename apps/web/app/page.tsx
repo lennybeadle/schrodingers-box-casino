@@ -47,6 +47,15 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Devnet Banner */}
+      <div className="bg-yellow-500/10 border-b border-yellow-500/20 px-6 py-2">
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="text-yellow-600 text-sm font-medium">
+            🧪 DEVNET MODE - Use devnet SOL for testing • Switch your wallet to Devnet
+          </p>
+        </div>
+      </div>
+
       {/* Navigation Header */}
       <nav className="relative z-50 px-6 py-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
