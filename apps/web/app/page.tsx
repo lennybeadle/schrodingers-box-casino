@@ -2,21 +2,19 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { WalletButton } from '@/components/WalletButton';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { UltraBettingClient } from '@/lib/ultraClient';
-import { connection } from '@/lib/solanaClient';
-import { PublicKey } from '@solana/web3.js';
+import { SuiWalletButton } from '@/components/SuiWalletButton';
+import { useWalletKit } from '@mysten/wallet-kit';
+import { CatsinoSuiClient } from '@/lib/suiClient';
 
 export default function Home() {
-  const { publicKey, signTransaction, signAllTransactions } = useWallet();
+  const { isConnected, currentAccount, signAndExecuteTransactionBlock } = useWalletKit();
   const [betAmount, setBetAmount] = useState<string>('0.01');
   const [isPlaying, setIsPlaying] = useState(false);
-  const [lastResult, setLastResult] = useState<{ success: boolean; message: string; txUrl?: string } | null>(null);
+  const [lastResult, setLastResult] = useState<{ success: boolean; message: string; txUrl?: string; isWinner?: boolean } | null>(null);
 
   const handleQuickFlip = async () => {
-    if (!publicKey || !signTransaction || !signAllTransactions) {
-      alert('Please connect your wallet first');
+    if (!isConnected || !currentAccount || !signAndExecuteTransactionBlock) {
+      alert('Please connect your Sui wallet first');
       return;
     }
 
@@ -24,8 +22,8 @@ export default function Home() {
     setLastResult(null);
 
     try {
-      const houseWallet = new PublicKey('9xDnozdsXgbi7ugacMxGTBmNxPMktPZwUKCv757WwCy4');
-      const client = new UltraBettingClient({ publicKey, signTransaction, signAllTransactions }, connection, houseWallet);
+      const wallet = { signAndExecuteTransactionBlock, account: currentAccount };
+      const client = new CatsinoSuiClient(wallet);
       
       const result = await client.placeBet(parseFloat(betAmount));
       
@@ -47,11 +45,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Devnet Banner */}
-      <div className="bg-yellow-500/10 border-b border-yellow-500/20 px-6 py-2">
+      {/* Sui Banner */}
+      <div className="bg-blue-500/10 border-b border-blue-500/20 px-6 py-2">
         <div className="max-w-7xl mx-auto text-center">
-          <p className="text-yellow-600 text-sm font-medium">
-            🧪 DEVNET MODE - Use devnet SOL for testing • Switch your wallet to Devnet
+          <p className="text-blue-600 text-sm font-medium">
+            🌊 SUI TESTNET - Use testnet SUI for testing • Much cheaper than Solana!
           </p>
         </div>
       </div>
@@ -78,14 +76,14 @@ export default function Home() {
               </svg>
               <span className="hidden sm:inline text-sm">YouTube</span>
             </Link>
-            <WalletButton />
+            <SuiWalletButton />
           </div>
         </div>
       </nav>
 
       {/* Hero Section - Ultra Minimalist */}
       <main className="relative">
-        {!publicKey ? (
+        {!isConnected ? (
           /* Welcome State - Exceptional Minimalism */
           <div className="min-h-screen flex items-center justify-center px-6">
             <div className="max-w-4xl mx-auto text-center space-y-16">
@@ -133,9 +131,9 @@ export default function Home() {
 
                 {/* Elegant Connect */}
                 <div className="pt-8">
-                  <WalletButton />
+                  <SuiWalletButton />
                   <p className="text-xs text-gray-400 mt-6 font-mono">
-                    Connect to enter the quantum realm
+                    Connect Sui wallet to enter the quantum realm
                   </p>
                 </div>
               </div>
@@ -222,7 +220,7 @@ export default function Home() {
                   <div className="space-y-6">
                     <button 
                       onClick={handleQuickFlip}
-                      disabled={isPlaying || !publicKey}
+                      disabled={isPlaying || !isConnected}
                       className="group relative w-full py-8 bg-gradient-to-r from-gray-900 via-black to-gray-900 text-white overflow-hidden transition-all duration-700 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
                       style={{ borderRadius: '2px' }}
                     >

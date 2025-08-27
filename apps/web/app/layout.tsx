@@ -1,9 +1,9 @@
 import './globals.css';
-import { WalletContextProvider } from './providers/WalletContextProvider';
+import { SuiWalletProvider } from './providers/SuiWalletProvider';
 
 export const metadata = {
-  title: "Schrödinger's Box - Web3 Casino",
-  description: "Quantum cat coin flip on Solana - 50/50 odds, provable fairness",
+  title: "CATSINO - Caesar's Casino on Sui",
+  description: "Quantum cat coin flip on Sui - 49% win rate, instant payouts, much cheaper than Solana",
 };
 
 export default function RootLayout({
@@ -22,9 +22,9 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-white min-h-screen font-space text-caesar-black antialiased">
-        <WalletContextProvider>
+        <SuiWalletProvider>
           {children}
-        </WalletContextProvider>
+        </SuiWalletProvider>
       </body>
     </html>
   );
