@@ -7,12 +7,8 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_SOLANA_CLUSTER": "devnet",
-    "NEXT_PUBLIC_RPC_HTTP_URL": "https://api.devnet.solana.com",
-    "NEXT_PUBLIC_RPC_WSS_URL": "wss://api.devnet.solana.com", 
-    "NEXT_PUBLIC_PROGRAM_ID": "6AjouDKGuGBxq7w78m7DrtdZYw2Q2ZkH85AdkDBzaACt",
-    "NEXT_PUBLIC_MIN_BET_LAMPORTS": "1000000",
-    "NEXT_PUBLIC_MAX_EXPOSURE_BPS": "1000",
-    "NEXT_PUBLIC_HOUSE_EDGE_BPS": "200"
+    "NEXT_PUBLIC_SUI_NETWORK": "mainnet",
+    "NEXT_PUBLIC_PACKAGE_ID": "0xf053ee91251bfccab11f05ba48831ada4996cb4960c448fa35c7d83ce0ef4bbb",
+    "NEXT_PUBLIC_HOUSE_OBJECT_ID": "0x21a8335e248f9e7d1bba2ceecb20bbb85ca45fd8bd45227d9dd5e09a39c01735"
   }
 }
