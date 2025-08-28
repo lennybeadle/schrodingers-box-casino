@@ -244,7 +244,6 @@ export default function CrashPage() {
     }
 
     setIsPlaying(true);
-    setIsAnimating(true);
     setLastResult(null);
 
     try {
@@ -270,6 +269,9 @@ export default function CrashPage() {
         {
           onSuccess: async (result) => {
             console.log('Crash game transaction successful:', result);
+            
+            // Start the animation now that transaction is confirmed
+            setIsAnimating(true);
             
             // Parse the crash event from transaction events
             let crashMultiplier = 150;
@@ -325,6 +327,7 @@ export default function CrashPage() {
                 payout
               });
               setIsAnimating(false);
+              setIsPlaying(false);
               checkHouseBalance();
             }, 3000);
           },
@@ -335,6 +338,7 @@ export default function CrashPage() {
               message: `Game failed: ${error.message}`
             });
             setIsAnimating(false);
+            setIsPlaying(false);
           },
         },
       );
