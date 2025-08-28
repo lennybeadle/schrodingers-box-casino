@@ -7,6 +7,7 @@ import { SuiWalletButton } from '@/components/SuiWalletButton';
 import { BettingPanel } from '@/components/BettingPanel';
 import { GameNavigation } from '@/components/GameNavigation';
 import { Motorcycle } from '@/components/Motorcycle';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 
@@ -478,12 +479,7 @@ export default function CrashPage() {
       const result = await new Promise<any>((resolve, reject) => {
         signAndExecuteTransaction(
           { 
-            transaction: txb,
-            options: {
-              showEvents: true,
-              showEffects: true,
-              showInput: true,
-            }
+            transaction: txb
           },
           {
             onSuccess: async (data) => {
@@ -639,17 +635,17 @@ export default function CrashPage() {
   }, [currentAccount]);
   
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
       <GameNavigation />
       {/* Sui Network Banner */}
       <div className={`border-b px-6 py-2 ${
         NETWORK === 'mainnet' 
-          ? 'bg-green-500/10 border-green-500/20' 
-          : 'bg-blue-500/10 border-blue-500/20'
+          ? 'bg-green-500/10 dark:bg-green-500/20 border-green-500/20 dark:border-green-500/30' 
+          : 'bg-blue-500/10 dark:bg-blue-500/20 border-blue-500/20 dark:border-blue-500/30'
       }`}>
         <div className="max-w-7xl mx-auto text-center">
           <p className={`text-sm font-medium ${
-            NETWORK === 'mainnet' ? 'text-green-600' : 'text-blue-600'
+            NETWORK === 'mainnet' ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'
           }`}>
             {NETWORK === 'mainnet' 
               ? '🚀 SUI MAINNET - Real SUI betting with ultra-low fees!'
@@ -669,13 +665,14 @@ export default function CrashPage() {
                 alt="CatsinoFun Logo" 
                 className="w-8 h-8" 
               />
-              <span className="font-light text-xl tracking-wide text-gray-900">
+              <span className="font-light text-xl tracking-wide text-gray-900 dark:text-gray-100">
                 CatsinoFun
               </span>
             </Link>
           </div>
 
           <div className="flex items-center gap-6">
+            <ThemeToggle />
             <SuiWalletButton />
           </div>
         </div>
@@ -687,7 +684,7 @@ export default function CrashPage() {
           <div className="min-h-screen flex items-center justify-center px-6 pb-32">
             <div className="max-w-4xl mx-auto text-center space-y-16">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-orange-500/5 to-red-600/10 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-orange-500/5 to-red-600/10 dark:from-red-500/20 dark:via-orange-500/10 dark:to-red-600/20 rounded-full blur-3xl animate-pulse"></div>
                 <div className="relative">
                   <img 
                     src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/motorcycle.webp" 
@@ -699,21 +696,21 @@ export default function CrashPage() {
 
               <div className="space-y-12">
                 <div className="space-y-6">
-                  <h1 className="text-6xl font-thin text-gray-900 tracking-tight leading-tight">
-                    Cat <span className="bg-gradient-to-r from-red-600 via-orange-500 to-red-700 bg-clip-text text-transparent">Crash</span>
+                  <h1 className="text-6xl font-thin text-gray-900 dark:text-gray-100 tracking-tight leading-tight">
+                    Cat <span className="bg-gradient-to-r from-red-600 via-orange-500 to-red-700 dark:from-red-400 dark:via-orange-400 dark:to-red-500 bg-clip-text text-transparent">Crash</span>
                   </h1>
                   
-                  <div className="w-24 h-px bg-gradient-to-r from-transparent via-red-500 to-transparent mx-auto"></div>
+                  <div className="w-24 h-px bg-gradient-to-r from-transparent via-red-500 dark:via-red-400 to-transparent mx-auto"></div>
                   
-                  <p className="text-lg text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
+                  <p className="text-lg text-gray-600 dark:text-gray-400 font-light max-w-2xl mx-auto leading-relaxed">
                     Ride the multiplier wave and cash out before the crash.
                     <br className="hidden sm:block" />
                     Choose your target and test your nerve.
                   </p>
                 </div>
 
-                <div className="bg-gray-50 rounded-2xl p-8 max-w-md mx-auto">
-                  <h3 className="text-lg font-light text-gray-700 mb-4">Connect wallet to ride</h3>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 max-w-md mx-auto border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-light text-gray-700 dark:text-gray-300 mb-4">Connect wallet to ride</h3>
                   <SuiWalletButton />
                 </div>
               </div>
@@ -775,10 +772,10 @@ export default function CrashPage() {
                   </div>
                   
                   <div className="space-y-4">
-                    <h2 className="text-4xl font-thin text-gray-900">
+                    <h2 className="text-4xl font-thin text-gray-900 dark:text-gray-100">
                       Crash Arena
                     </h2>
-                    <div className="w-16 h-px bg-gradient-to-r from-transparent via-red-500 to-transparent mx-auto"></div>
+                    <div className="w-16 h-px bg-gradient-to-r from-transparent via-red-500 dark:via-red-400 to-transparent mx-auto"></div>
                   </div>
                 </div>
 
@@ -792,8 +789,8 @@ export default function CrashPage() {
                   
                   {/* Target Multiplier Selection */}
                   <div className="space-y-6">
-                    <div className="bg-white/80 backdrop-blur rounded-2xl p-8 border border-gray-100 shadow-sm space-y-4">
-                      <h3 className="text-xl font-light text-gray-900">Target Multiplier</h3>
+                    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-8 border border-gray-100 dark:border-gray-700 shadow-sm space-y-4 transition-colors duration-300">
+                      <h3 className="text-xl font-light text-gray-900 dark:text-gray-100">Target Multiplier</h3>
                       
                       {/* Target Slider */}
                       <div className="space-y-4">
