@@ -377,10 +377,23 @@ export default function CrashPage() {
           },
           onError: (error) => {
             console.error('Crash game failed:', error);
-            setLastResult({
-              success: false,
-              message: `Game failed: ${error.message}`
-            });
+            
+            // Check if this might be a wallet communication error after signing
+            const errorMessage = error.message || error.toString();
+            if (errorMessage.includes('channel closed') || 
+                errorMessage.includes('Unexpected error') ||
+                errorMessage.includes('listener indicated')) {
+              setLastResult({
+                success: false,
+                message: "⚠️ Wallet closed unexpectedly. If you signed the transaction, it may still be processing. Check your wallet history."
+              });
+            } else {
+              setLastResult({
+                success: false,
+                message: `Game failed: ${errorMessage}`
+              });
+            }
+            
             setIsAnimating(false);
             setIsPlaying(false);
           },
@@ -388,10 +401,21 @@ export default function CrashPage() {
       );
     } catch (error) {
       console.error('Crash game error:', error);
-      setLastResult({
-        success: false,
-        message: `Error: ${error}`
-      });
+      
+      const errorMessage = error?.toString() || 'Unknown error';
+      if (errorMessage.includes('channel closed') || 
+          errorMessage.includes('Unexpected error') ||
+          errorMessage.includes('listener indicated')) {
+        setLastResult({
+          success: false,
+          message: "⚠️ Wallet connection lost. If you signed the transaction, check your wallet history to see if it went through."
+        });
+      } else {
+        setLastResult({
+          success: false,
+          message: `Transaction error: ${errorMessage}`
+        });
+      }
       setIsAnimating(false);
     } finally {
       setIsPlaying(false);
