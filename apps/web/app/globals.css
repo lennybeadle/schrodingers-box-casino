@@ -86,3 +86,38 @@ body.slide-right main {
   background: rgba(0, 0, 0, 0.5);
   z-index: 40;
 }
+
+/* Custom slider styles */
+.slider-slate::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(to right, rgb(30 41 59), rgb(15 23 42));
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(148, 163, 184, 0.5);
+  transition: all 0.2s;
+}
+
+.slider-slate::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+.slider-slate::-moz-range-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(to right, rgb(30 41 59), rgb(15 23 42));
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(148, 163, 184, 0.5);
+  transition: all 0.2s;
+}
+
+.slider-slate::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}

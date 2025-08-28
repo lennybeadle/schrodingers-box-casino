@@ -520,9 +520,10 @@ export default function RevolverPage() {
                     <button
                       onClick={handleSpin}
                       disabled={isSpinning || !currentAccount}
-                      className="w-full relative bg-gradient-to-r from-red-600 via-orange-600 to-yellow-600 text-white px-12 py-6 rounded-2xl font-light text-xl tracking-wide transition-all duration-300 hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none overflow-hidden group"
+                      className="group relative w-full py-8 bg-gradient-to-r from-gray-900 via-black to-gray-900 text-white overflow-hidden transition-all duration-700 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
+                      style={{ borderRadius: '2px' }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-red-700 via-orange-700 to-yellow-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-orange-500 to-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                       <span className="relative z-10 flex items-center justify-center gap-4 text-xl font-light tracking-widest">
                         {isSpinning ? (
                           <>
@@ -530,7 +531,9 @@ export default function RevolverPage() {
                             SPINNING CYLINDER
                           </>
                         ) : (
-                          'SPIN THE REVOLVER'
+                          <>
+                            🔫 SPIN
+                          </>
                         )}
                       </span>
                     </button>

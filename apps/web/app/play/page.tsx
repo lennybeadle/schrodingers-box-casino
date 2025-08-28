@@ -194,10 +194,10 @@ export default function Play() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                       <div className="bg-gray-50 rounded-lg p-6 text-center">
                         <div className="text-lg font-bold text-czar-gold mb-1">
-                          3.96% | 3.0%
+                          3.96% | 3.0% | 3.0%
                         </div>
                         <div className="text-sm text-gray-600">House Edge</div>
-                        <div className="text-xs text-gray-500 mt-1">CoinFlip | Revolver</div>
+                        <div className="text-xs text-gray-500 mt-1">CoinFlip | Crash | Revolver</div>
                       </div>
                       <div className="bg-gray-50 rounded-lg p-6 text-center">
                         <div className="text-2xl font-bold text-czar-gold mb-1">

@@ -83,34 +83,50 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+              <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                 <Link 
                   href="/play/coinflip"
-                  className="group bg-white/80 backdrop-blur rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105"
+                  className="group bg-white/80 backdrop-blur rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105"
                 >
-                  <div className="text-center space-y-4">
+                  <div className="text-center space-y-3">
                     <img 
                       src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/tails.webp"
                       alt="CatFlip" 
-                      className="w-24 h-24 mx-auto rounded-full"
+                      className="w-20 h-20 mx-auto rounded-full"
                     />
-                    <h3 className="text-xl font-light text-gray-900">CatFlip CoinFlip</h3>
+                    <h3 className="text-lg font-light text-gray-900">CatFlip CoinFlip</h3>
                     <p className="text-sm text-gray-600">Classic coin flip • 1.96x payout</p>
                     <div className="text-xs text-gray-400">Click to play →</div>
                   </div>
                 </Link>
 
                 <Link 
-                  href="/play/revolver"
-                  className="group bg-white/80 backdrop-blur rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105"
+                  href="/play/crash"
+                  className="group bg-white/80 backdrop-blur rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105"
                 >
-                  <div className="text-center space-y-4">
+                  <div className="text-center space-y-3">
+                    <img 
+                      src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/motorcycle.webp"
+                      alt="Cat Crash" 
+                      className="w-20 h-20 mx-auto rounded-full"
+                    />
+                    <h3 className="text-lg font-light text-gray-900">Cat Crash</h3>
+                    <p className="text-sm text-gray-600">Crash game • Up to 30x multiplier</p>
+                    <div className="text-xs text-gray-400">Click to play →</div>
+                  </div>
+                </Link>
+
+                <Link 
+                  href="/play/revolver"
+                  className="group bg-white/80 backdrop-blur rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105"
+                >
+                  <div className="text-center space-y-3">
                     <img 
                       src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/revolver.webp"
                       alt="Revolver Roulette" 
-                      className="w-24 h-24 mx-auto rounded-full"
+                      className="w-20 h-20 mx-auto rounded-full"
                     />
-                    <h3 className="text-xl font-light text-gray-900">Revolver Roulette</h3>
+                    <h3 className="text-lg font-light text-gray-900">Revolver Roulette</h3>
                     <p className="text-sm text-gray-600">Russian roulette • 7.76x payout</p>
                     <div className="text-xs text-gray-400">Click to play →</div>
                   </div>
