@@ -158,7 +158,7 @@ export default function Home() {
         target: `${PACKAGE_ID}::casino::withdraw_profits`,
         arguments: [
           txb.object(HOUSE_OBJECT_ID),
-          txb.pure(withdrawAmountMist),
+          txb.pure.u64(withdrawAmountMist),
         ],
       });
 

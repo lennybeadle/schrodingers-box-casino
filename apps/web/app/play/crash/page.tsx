@@ -276,17 +276,27 @@ export default function CrashPage() {
             let isWinner = false;
             let payout = 0;
 
-            if (result.events && result.events.length > 0) {
-              const crashEvent = result.events.find(event => 
-                event.type.includes('crash::CrashEvent')
-              );
+            // Fetch transaction details to get events
+            try {
+              const txResult = await suiClient.getTransactionBlock({
+                digest: result.digest,
+                options: { showEvents: true }
+              });
 
-              if (crashEvent && crashEvent.parsedJson) {
-                const eventData = crashEvent.parsedJson as any;
-                crashMultiplier = parseInt(eventData.crash_x100);
-                isWinner = eventData.win;
-                payout = parseInt(eventData.payout) / 1_000_000_000;
+              if (txResult.events && txResult.events.length > 0) {
+                const crashEvent = txResult.events.find(event => 
+                  event.type && event.type.includes('crash::CrashEvent')
+                );
+
+                if (crashEvent && crashEvent.parsedJson) {
+                  const eventData = crashEvent.parsedJson as any;
+                  crashMultiplier = parseInt(eventData.crash_x100);
+                  isWinner = eventData.win;
+                  payout = parseInt(eventData.payout) / 1_000_000_000;
+                }
               }
+            } catch (eventError) {
+              console.warn('Could not fetch events:', eventError);
             }
 
             const explorerUrl = `https://suiexplorer.com/txblock/${result.digest}?network=${NETWORK}`;
@@ -450,7 +460,7 @@ export default function CrashPage() {
                       {isAnimating && (
                         <div className="absolute top-4 right-4 bg-black/90 text-white px-4 py-2 rounded-lg backdrop-blur">
                           <div className="text-xl font-mono font-bold text-green-400">
-                            {(Math.random() * (targetMultiplier - 100) + 100).toFixed(0) / 100}×
+                            {((Math.random() * (targetMultiplier - 100) + 100) / 100).toFixed(2)}×
                           </div>
                         </div>
                       )}
