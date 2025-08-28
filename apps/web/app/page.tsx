@@ -567,8 +567,19 @@ export default function Home() {
                       </div>
                     )}
 
-                    {/* Advanced Link */}
-                    <div className="text-center pt-4">
+                    {/* Game Navigation */}
+                    <div className="text-center pt-4 space-y-3">
+                      <div className="flex justify-center gap-8 text-sm">
+                        <div className="text-czar-gold font-mono">
+                          • Coin Flip
+                        </div>
+                        <Link 
+                          href="/play/revolver" 
+                          className="text-gray-400 hover:text-red-600 transition-colors duration-300 font-mono tracking-wide"
+                        >
+                          Revolver Roulette →
+                        </Link>
+                      </div>
                       <Link 
                         href="/play" 
                         className="text-sm text-gray-400 hover:text-czar-gold transition-colors duration-300 font-mono tracking-wide"

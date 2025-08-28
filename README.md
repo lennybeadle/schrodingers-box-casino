@@ -1,504 +1,331 @@
-# 🐱 Schrödinger's Box - Solana Casino
+# 🐱 CatsinoFun - Sui Multi-Game Casino
 
-A complete, production-ready starter repository for a single-game Solana casino featuring a 50/50 "Schrödinger's Box" coin flip game with a cute cat theme.
+A complete, production-ready Sui blockchain casino featuring multiple quantum-themed games with cute cat mechanics and imperial elegance.
 
-## 🎯 Features
+## 🎯 Games Available
 
-- **50/50 Coin Flip Game**: Fair odds with Switchboard VRF randomness
-- **No User Accounts**: Just connect wallet and play
-- **Automatic Payouts**: On-chain settlement in SOL
-- **Low House Edge**: Only 2% house edge
-- **Modern UI**: Next.js 14 with Tailwind CSS and cute cat animations
-- **Production Ready**: Complete testing, deployment scripts, and monitoring
+### 1. **Coin Flip** - "Emperor's Game"
+- **Win Rate**: 47% (reduced for house sustainability)
+- **Payout**: 2.0x multiplier
+- **House Edge**: 6%
+- **Theme**: Quantum mechanics meets imperial elegance
+- **Animation**: 3D coin flip with heads/tails sides
+
+### 2. **Revolver Roulette** - "Alive Cat"
+- **Win Rate**: 12.5% (45° out of 360°)
+- **Payout**: 7.76x multiplier (194/25 ratio)
+- **House Edge**: 3%
+- **Theme**: Russian roulette with quantum cat
+- **Animation**: Spinning revolver cylinder
+
+## 🏗️ Architecture
+
+### **Sui Move Smart Contracts**
+- **Shared House System**: Single vault for all games
+- **Native Randomness**: Uses `sui::random` for provable fairness
+- **Owner Withdrawals**: Secure profit extraction system
+- **Cross-Game Stats**: Unified betting statistics
+
+### **Next.js Frontend**
+- **App Router**: Modern Next.js 14 with TypeScript
+- **Wallet Integration**: @mysten/dapp-kit for Sui wallets
+- **Responsive Design**: Tailwind CSS with custom animations
+- **Real-time Updates**: Live balance and transaction tracking
 
 ## 📁 Repository Structure
 
 ```
 catsinofun/
-├── apps/web/                 # Next.js frontend
-│   ├── app/                  # App Router pages
-│   ├── components/           # React components
-│   └── lib/                  # Solana client libraries
-├── programs/catflip/         # Anchor program
-│   ├── src/
-│   │   ├── instructions/     # Program instructions
-│   │   └── state/           # Account structures
-├── tests/                    # Anchor tests
-├── scripts/                  # Utility scripts
-└── configs/                  # Configuration templates
+├── apps/web/                    # Next.js 14 frontend
+│   ├── app/
+│   │   ├── page.tsx            # Main coin flip game
+│   │   └── play/
+│   │       └── revolver/       # Revolver roulette game
+│   │           └── page.tsx
+│   ├── components/
+│   │   ├── Spinner.tsx         # Revolver spinner component
+│   │   └── SuiWalletButton.tsx # Wallet connection
+│   └── lib/
+│       └── suiClient.ts        # Sui client helpers
+├── sui-catsino/                # Sui Move workspace
+│   ├── sources/
+│   │   ├── catsino.move       # Main casino & house system
+│   │   └── revolver.move      # Revolver roulette game
+│   └── Move.toml              # Package manifest
+├── scripts/                    # Deployment & utility scripts
+│   ├── publish_revolver.ts    # Deploy revolver game
+│   └── init_house_if_missing.ts # Check house setup
+└── README.md
 ```
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### 1. **Environment Setup**
 
-- [Node.js 18+](https://nodejs.org/)
-- [Rust](https://rustup.rs/)
-- [Solana CLI](https://docs.solana.com/cli/install-solana-cli-tools)
-- [Anchor CLI](https://www.anchor-lang.com/docs/installation)
-- [pnpm](https://pnpm.io/)
-
-### 1. Clone and Install
+Create `.env.local` in `apps/web/`:
 
 ```bash
-git clone <repo-url>
-cd catsinofun
+# Network Configuration
+NEXT_PUBLIC_SUI_NETWORK=testnet  # or "mainnet"
+
+# Shared House System (from main casino deployment)
+NEXT_PUBLIC_PACKAGE_ID=0x81e3ec93b4682c94fb57dede2507d7384ef19805d98557669aca15f7320c771b
+NEXT_PUBLIC_HOUSE_OBJECT_ID=0xf9af5e31d72db67489d60e2d68f51c2ad915d4cad25f4d6acae4c51ed83b0ce3
+
+# Revolver Game (after deploying revolver module)
+NEXT_PUBLIC_REVOLVER_PACKAGE=0x... # Set after deployment
+NEXT_PUBLIC_REVOLVER_MODULE=revolver
+NEXT_PUBLIC_REVOLVER_FUN=play
+NEXT_PUBLIC_IMAGE_REVOLVER=https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/revolver.webp
+
+# Game Configuration
+MIN_BET_MIST=1000000              # 0.001 SUI minimum
+MAX_EXPOSURE_BPS=1000             # 10% max vault exposure
+HOUSE_EDGE_BPS=300                # 3% house edge for revolver
+```
+
+### 2. **Install Dependencies**
+
+```bash
+# Install root dependencies (includes sui CLI tools)
 pnpm install
+
+# Install frontend dependencies
+cd apps/web
+pnpm install
+cd ../..
 ```
 
-### 2. Setup Solana Wallet
+### 3. **Setup Sui CLI**
 
 ```bash
-# Generate a new keypair (or use existing)
-solana-keygen new --outfile ~/.config/solana/id.json
+# Install Sui CLI if not already installed
+# Follow: https://docs.sui.io/guides/developer/getting-started/sui-install
 
-# Set to devnet
-solana config set --url devnet
+# Configure for testnet
+sui client switch --env testnet
 
-# Airdrop SOL for development
-solana airdrop 2
+# Create or import wallet
+sui client new-address ed25519
+# OR import existing: sui keytool import "your-mnemonic-phrase" ed25519
+
+# Get testnet SUI
+sui client faucet
 ```
 
-### 3. Configure Environment
+### 4. **Deploy Smart Contracts**
 
 ```bash
-# Copy environment templates
-cp .env.example .env
-cp apps/web/.env.example apps/web/.env.local
+# Build and deploy main casino (if not already deployed)
+pnpm sui:build
 
-# Edit .env files with your configuration
+# Check if house exists
+pnpm check:house
+
+# Deploy revolver game module
+pnpm publish:revolver
+
+# Update .env.local with the returned package ID
 ```
 
-### 4. Build and Deploy
+### 5. **Fund the House**
 
 ```bash
-# Build the Anchor program
-anchor build
+# The house needs SUI to pay out winners
+# Fund via the web interface at /makaveli path or programmatically
 
-# Deploy to devnet
-anchor deploy --provider.cluster devnet
-
-# Update your .env files with the deployed PROGRAM_ID
+# Example: Fund with 10 SUI for testing
+sui client call \
+  --function fund_house \
+  --module casino \
+  --package $NEXT_PUBLIC_PACKAGE_ID \
+  --args $NEXT_PUBLIC_HOUSE_OBJECT_ID [amount] \
+  --gas-budget 5000000
 ```
 
-### 5. Initialize and Fund Vault
+### 6. **Run Development Server**
 
 ```bash
-# Initialize the game vault
-anchor run initialize
-
-# Fund vault with 10 SOL
-ts-node scripts/fund_vault.ts 10
-```
-
-### 6. Start Frontend
-
-```bash
-# Start the web application
 pnpm dev
 ```
 
-Visit `http://localhost:3000` and start playing! 🎮
+Visit `http://localhost:3000` to play!
 
-## 🔧 Configuration
+## 🎮 Game Mechanics
 
-### Environment Variables
-
-#### Root `.env`
-```bash
-SOLANA_CLUSTER=devnet
-RPC_HTTP_URL=https://solana-devnet.nownodes.io/YOUR-API-KEY
-RPC_WSS_URL=wss://solana-devnet.nownodes.io/YOUR-API-KEY
-HOUSE_AUTHORITY_SECRET=your_base58_secret_key
-SWITCHBOARD_VRF_QUEUE=F8ce7MscPZmvGzjJamoKggfq86NxZ6zDKfz6NrJJzBG7
-SWITCHBOARD_VRF_ACCOUNT=your_vrf_account_address
-PROGRAM_ID=your_deployed_program_id
-MIN_BET_LAMPORTS=1000000      # 0.001 SOL
-MAX_EXPOSURE_BPS=1000         # 10% of vault
-HOUSE_EDGE_BPS=200            # 2% house edge
+### **Coin Flip Math**
+```
+Win Rate: 47%
+Payout: 2.0x (includes stake return)
+House Edge: 6%
+Expected Value: (0.47 × 2.0) + (0.53 × 0) = 0.94 (house keeps 6%)
 ```
 
-#### Frontend `.env.local`
-```bash
-NEXT_PUBLIC_SOLANA_CLUSTER=devnet
-NEXT_PUBLIC_RPC_HTTP_URL=https://solana-devnet.nownodes.io/YOUR-API-KEY
-NEXT_PUBLIC_RPC_WSS_URL=wss://solana-devnet.nownodes.io/YOUR-API-KEY
-NEXT_PUBLIC_PROGRAM_ID=your_deployed_program_id
-NEXT_PUBLIC_MIN_BET_LAMPORTS=1000000
-NEXT_PUBLIC_MAX_EXPOSURE_BPS=1000
-NEXT_PUBLIC_HOUSE_EDGE_BPS=200
+### **Revolver Roulette Math**
 ```
-
-## 🎲 Switchboard VRF Setup
-
-### Create VRF Account
-
-```bash
-# Install Switchboard CLI
-npm install -g @switchboard-xyz/cli
-
-# Create VRF account
-sbv2 solana vrf create --keypair ~/.config/solana/id.json --cluster devnet
-```
-
-### Grant Permissions
-
-```bash
-# Grant permissions to the VRF account
-sbv2 solana permission create \
-  --granter <QUEUE_AUTHORITY> \
-  --grantee <YOUR_VRF_ACCOUNT> \
-  --keypair ~/.config/solana/id.json \
-  --cluster devnet
-```
-
-### Update Configuration
-
-Add your VRF account address to both `.env` files:
-```bash
-SWITCHBOARD_VRF_ACCOUNT=your_new_vrf_account_address
-```
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-anchor test
-
-# Run specific test file
-anchor test --file tests/catflip.ts
-
-# Test with custom configuration
-anchor test --provider.cluster devnet
-```
-
-## 📊 Utility Scripts
-
-### Fund Vault
-```bash
-# Fund with specific amount
-ts-node scripts/fund_vault.ts 5.0  # Fund with 5 SOL
-```
-
-### Place Test Bet
-```bash
-# Place a test bet
-ts-node scripts/place_bet.ts 0.1  # Bet 0.1 SOL
-```
-
-### View Statistics
-```bash
-# View casino statistics
-ts-node scripts/read_stats.ts
-```
-
-## 📱 Frontend Architecture
-
-### Pages
-- `/` - Landing page with cat SVG and wallet connect
-- `/play` - Game interface with betting panel
-
-### Key Components
-- `CatAnimation` - Animated SVG cat with win/lose states
-- `BetPanel` - Main betting interface
-- `WalletButton` - Solana wallet connection
-
-### State Management
-- Real-time vault balance updates
-- Transaction status tracking
-- Recent game results
-- Responsive UI animations
-
-## 🏗️ Smart Contract Architecture
-
-### Program Instructions
-
-1. **initialize** - Set up game vault with configuration
-2. **fund_vault** - Add SOL to the vault (house only)
-3. **bet** - Place a bet and request randomness
-4. **fulfill_randomness** - VRF callback to settle bet
-5. **refund_timeout** - Refund if VRF fails
-6. **set_pause** - Emergency pause (admin)
-7. **set_limits** - Update betting limits (admin)
-8. **set_edge** - Update house edge (admin)
-
-### Account Structure
-
-#### Vault Account
-```rust
-pub struct Vault {
-    pub authority: Pubkey,      // House authority
-    pub bump: u8,               // PDA bump seed
-    pub is_paused: bool,        // Emergency pause
-    pub min_bet_lamports: u64,  // Minimum bet
-    pub max_exposure_bps: u16,  // Max single bet (basis points)
-    pub house_edge_bps: u16,    // House edge (basis points)
-    pub total_volume: u64,      // Total wagered
-    pub total_bets: u64,        // Number of bets
-    pub total_wins: u64,        // Player wins
-}
-```
-
-#### Bet Round Account
-```rust
-pub struct BetRound {
-    pub player: Pubkey,              // Player wallet
-    pub stake_lamports: u64,         // Bet amount
-    pub potential_payout: u64,       // Win payout
-    pub timestamp: i64,              // Bet timestamp
-    pub slot: u64,                   // Solana slot
-    pub vrf_request_randomness: [u8; 32], // VRF request ID
-    pub is_settled: bool,            // Settlement status
-    pub is_winner: bool,             // Win/lose result
-    pub bump: u8,                    // PDA bump
-}
-```
-
-### Security Features
-
-- **Single Settlement**: Each bet can only be settled once
-- **Vault Balance Checks**: Ensures sufficient funds for payouts
-- **Exposure Limits**: Prevents large bets from draining vault
-- **Timeout Protection**: Players can recover funds if VRF fails
-- **Admin Controls**: Emergency pause and parameter updates
-
-## 🚀 Deployment Guide
-
-### Devnet Deployment
-
-```bash
-# Build program
-anchor build
-
-# Deploy to devnet
-anchor deploy --provider.cluster devnet
-
-# Initialize vault
-anchor run initialize
-
-# Fund vault
-ts-node scripts/fund_vault.ts 10
-
-# Deploy frontend to Vercel
-vercel --prod
-```
-
-### Mainnet-Beta Deployment
-
-```bash
-# Switch to mainnet
-solana config set --url mainnet-beta
-
-# Update Anchor.toml
-# [programs.mainnet-beta]
-# catflip = "YOUR_PROGRAM_ID"
-
-# Deploy program
-anchor deploy --provider.cluster mainnet-beta
-
-# Update production environment variables
-# Deploy frontend with mainnet config
-```
-
-### Vercel Deployment
-
-1. Connect repository to Vercel
-2. Set environment variables:
-   ```
-   NEXT_PUBLIC_SOLANA_CLUSTER=mainnet-beta
-   NEXT_PUBLIC_RPC_HTTP_URL=your_mainnet_rpc
-   NEXT_PUBLIC_PROGRAM_ID=your_mainnet_program_id
-   ```
-3. Deploy from `apps/web` directory
-
-## ⚡ NOWNodes RPC Configuration
-
-1. Sign up at [NOWNodes](https://nownodes.io/)
-2. Get your API key
-3. Configure endpoints:
-   ```bash
-   # Devnet
-   RPC_HTTP_URL=https://solana-devnet.nownodes.io/YOUR-API-KEY  
-   RPC_WSS_URL=wss://solana-devnet.nownodes.io/YOUR-API-KEY
-   
-   # Mainnet
-   RPC_HTTP_URL=https://solana.nownodes.io/YOUR-API-KEY
-   RPC_WSS_URL=wss://solana.nownodes.io/YOUR-API-KEY
-   ```
-
-## 📈 Game Economics
-
-### Payout Calculation
-```
-Win Payout = Bet Amount × 2 × (1 - House Edge)
-Example: 1 SOL bet = 1.96 SOL payout (2% house edge)
-```
-
-### Risk Management
-- **Max Exposure**: 10% of vault balance per bet
-- **Min Bet**: 0.001 SOL (configurable)
-- **House Edge**: 2% (configurable)
-
-### Example Scenarios
-
-| Vault Balance | Max Single Bet | Min Bet | House Edge |
-|---------------|----------------|---------|------------|
-| 100 SOL       | 10 SOL         | 0.001 SOL | 2% |
-| 1000 SOL      | 100 SOL        | 0.001 SOL | 2% |
-
-## 🛡️ Security Considerations
-
-### Smart Contract Security
-- ✅ No re-entrancy vulnerabilities
-- ✅ Overflow protection with checked math
-- ✅ Proper authority checks
-- ✅ Single settlement enforcement
-- ✅ Timeout protection for failed randomness
-
-### Operational Security
-- 🔐 Use hardware wallet for mainnet authority
-- 🔐 Implement multi-sig for large vaults
-- 🔐 Regular security audits
-- 🔐 Monitor vault balance and unusual activity
-
-### Frontend Security
-- ✅ No private keys stored in frontend
-- ✅ RPC endpoint validation
-- ✅ Transaction verification
-- ✅ Proper error handling
-
-## 🌍 Legal and Compliance
-
-⚠️ **Important Notice**: Online gambling is subject to various laws and regulations. Before deploying:
-
-1. **Research Local Laws**: Check gambling regulations in your jurisdiction
-2. **Age Verification**: Implement age verification if required
-3. **Geofencing**: Consider blocking access from restricted regions
-4. **Licensing**: Obtain appropriate gambling licenses
-5. **Responsible Gaming**: Implement betting limits and self-exclusion
-
-### Geofencing Template
-```typescript
-// Add to frontend for geofencing
-const RESTRICTED_COUNTRIES = ['US', 'CN', 'IN']; // Example
-const userCountry = getUserCountry(); // Implement IP-based detection
-if (RESTRICTED_COUNTRIES.includes(userCountry)) {
-  showGeofencingMessage();
-}
+Win Condition: Angle ∈ [0°, 45°)
+Win Rate: 45/360 = 12.5%
+Payout: 194/25 = 7.76x (includes stake return)  
+House Edge: 3%
+Expected Value: (0.125 × 7.76) + (0.875 × 0) = 0.97 (house keeps 3%)
 ```
 
 ## 🔧 Advanced Configuration
 
-### Custom House Edge
+### **House Management**
+
+The house owner (deployer) can:
+- **Withdraw Profits**: Extract accumulated house edge
+- **Monitor Stats**: View total bets, wins, volume
+- **Fund House**: Add SUI for larger payouts
+
 ```bash
-# Set 3% house edge
-ts-node scripts/set_edge.ts 300
+# Withdraw 1 SUI profit
+sui client call \
+  --function withdraw_profits \
+  --module casino \
+  --package $NEXT_PUBLIC_PACKAGE_ID \
+  --args $NEXT_PUBLIC_HOUSE_OBJECT_ID 1000000000 \
+  --gas-budget 5000000
 ```
 
-### Custom Betting Limits
+### **Admin Features**
+
+Access admin controls by visiting `/makaveli`:
+- House funding interface
+- Balance warnings
+- Operational insights
+
+### **Custom Deployment**
+
+To deploy on mainnet:
+
+1. **Switch Network**:
+   ```bash
+   sui client switch --env mainnet
+   ```
+
+2. **Update Environment**:
+   ```bash
+   NEXT_PUBLIC_SUI_NETWORK=mainnet
+   ```
+
+3. **Deploy with Gas**:
+   ```bash
+   pnpm publish:revolver
+   ```
+
+4. **Fund House**:
+   ```bash
+   # Fund with production amount (e.g., 100 SUI)
+   ```
+
+## 🧪 Testing & Development
+
+### **Move Package Testing**
 ```bash
-# Set min bet to 0.01 SOL, max exposure to 5%
-ts-node scripts/set_limits.ts 0.01 500
+# Test smart contracts
+pnpm sui:test
+
+# Build only
+pnpm sui:build
 ```
 
-### Emergency Pause
+### **Frontend Testing**
 ```bash
-# Pause the game
-ts-node scripts/pause.ts true
-
-# Resume the game  
-ts-node scripts/pause.ts false
+cd apps/web
+pnpm test  # If tests are added
+pnpm build # Production build
 ```
 
-## 📊 Monitoring and Analytics
+### **Local Testing Flow**
+1. Deploy contracts to testnet
+2. Fund house with testnet SUI
+3. Test both games thoroughly
+4. Monitor gas costs and performance
+5. Deploy to mainnet when ready
 
-### On-Chain Metrics
-- Total volume wagered
-- Number of bets placed
-- Player win rate
-- Vault balance over time
-- Average bet size
+## 🔐 Security Considerations
 
-### Off-Chain Analytics
-```typescript
-// Example analytics integration
-import { Analytics } from './analytics';
+### **Randomness**
+- Uses Sui's native `sui::random` for provable fairness
+- No off-chain randomness dependencies
+- Gas-path parity to prevent side-channel attacks
 
-Analytics.track('bet_placed', {
-  amount: betAmount,
-  player: playerPubkey.toString(),
-  timestamp: Date.now()
-});
-```
+### **House Management**
+- Only deployer can withdraw profits
+- Solvency checks prevent over-exposure
+- Shared object for cross-game consistency
 
-## 🆘 Troubleshooting
+### **Frontend Security**
+- Input validation on bet amounts
+- Balance verification before transactions
+- Transaction confirmation UI
 
-### Common Issues
+## 📊 Monitoring & Analytics
 
-#### "Program account does not exist"
+### **On-Chain Metrics**
+- Total bets placed
+- Total volume wagered  
+- House win/loss ratio
+- Profit margins per game
+
+### **Event Tracking**
+- `BetPlaced` events (coin flip)
+- `SpinEvent` events (revolver)
+- `ProfitWithdrawn` events
+- `HouseFunded` events
+
+## 🚨 Troubleshooting
+
+### **Common Issues**
+
+1. **"House Insufficient Funds"**
+   - Fund the house with more SUI
+   - Check house balance at `/makaveli`
+
+2. **"Transaction Failed"**
+   - Ensure wallet has enough SUI for gas
+   - Check network connectivity
+   - Verify contract addresses
+
+3. **"Events Not Loading"**
+   - Blockchain indexing delay (normal)
+   - Wait 10-30 seconds and refresh
+   - Check transaction in explorer
+
+### **Debug Commands**
 ```bash
-# Redeploy the program
-anchor build && anchor deploy
-```
+# Check house status
+pnpm check:house
 
-#### "Insufficient funds for rent"  
-```bash
-# Airdrop more SOL
-solana airdrop 2
-```
+# View recent transactions
+sui client active-address
+sui client gas
 
-#### "VRF account invalid"
-```bash
-# Create and configure VRF account
-sbv2 solana vrf create --keypair ~/.config/solana/id.json
-```
-
-#### Frontend wallet connection issues
-```bash
-# Clear browser cache and localStorage
-# Ensure wallet extension is updated
-```
-
-### Debug Mode
-
-Enable debug logging:
-```bash
-export ANCHOR_LOG=true
-anchor test --file tests/catflip.ts
+# Test Move functions
+pnpm sui:test
 ```
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+2. Create feature branch
+3. Test thoroughly on testnet
+4. Submit pull request
 
-### Development Guidelines
-- Follow Rust naming conventions
-- Add comprehensive tests
-- Update documentation
-- Use TypeScript for frontend code
-
-## 📄 License
+## 📜 License
 
 MIT License - see LICENSE file for details.
 
-## 🙏 Acknowledgments
+## 🔗 Links
 
-- [Anchor Framework](https://www.anchor-lang.com/)
-- [Switchboard Network](https://switchboard.xyz/)
-- [Solana Labs](https://solana.com/)
-- [NOWNodes](https://nownodes.io/)
+- **Sui Documentation**: https://docs.sui.io
+- **dApp Kit**: https://sdk.mystenlabs.com/dapp-kit
+- **Sui Randomness Guide**: https://docs.sui.io/guides/developer/advanced/randomness-onchain
+- **Sui Explorer Testnet**: https://suiexplorer.com/?network=testnet
+- **Sui Explorer Mainnet**: https://suiexplorer.com/?network=mainnet
 
 ---
 
-## 📞 Support
-
-For questions and support:
-- Open an issue on GitHub
-- Join the Solana Discord
-- Check Anchor documentation
-
-**Happy building! 🐱✨**
+*Built with ❤️ for the Sui ecosystem. May Schrödinger's cat always land on its feet!* 🐱

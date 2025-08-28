@@ -15,12 +15,21 @@
   50% { transform: translateY(-10px); }
 }
 
+@keyframes spin-fast {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .animate-coin-flip {
   animation: coin-flip 3s ease-in-out infinite;
 }
 
 .animate-caesar-float {
   animation: caesar-float 3s ease-in-out infinite;
+}
+
+.animate-spin-fast {
+  animation: spin-fast 0.1s linear infinite;
 }
 
 /* Custom modal styles for dapp-kit */

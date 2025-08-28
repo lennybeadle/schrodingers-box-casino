@@ -8,10 +8,15 @@
     "build:full": "anchor build && pnpm -F web build",
     "test": "anchor test",
     "deploy:devnet": "anchor deploy --provider.cluster devnet",
-    "deploy:mainnet": "anchor deploy --provider.cluster mainnet-beta"
+    "deploy:mainnet": "anchor deploy --provider.cluster mainnet-beta",
+    "publish:revolver": "tsx scripts/publish_revolver.ts",
+    "check:house": "tsx scripts/init_house_if_missing.ts",
+    "sui:build": "cd sui-catsino && sui move build",
+    "sui:test": "cd sui-catsino && sui move test"
   },
   "devDependencies": {
     "@coral-xyz/anchor": "^0.31.0",
+    "@mysten/sui": "latest",
     "@solana/web3.js": "^1.95.3",
     "@switchboard-xyz/solana.js": "^3.2.5",
     "@types/chai": "^4.3.19",
@@ -20,6 +25,7 @@
     "chai": "^4.5.0",
     "mocha": "^10.7.3",
     "ts-mocha": "^10.0.0",
+    "tsx": "^4.7.1",
     "typescript": "^5.5.4"
   }
 }
