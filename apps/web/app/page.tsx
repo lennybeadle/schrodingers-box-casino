@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { SuiWalletButton } from '@/components/SuiWalletButton';
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
@@ -10,6 +11,7 @@ export default function Home() {
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const suiClient = useSuiClient();
+  const pathname = usePathname();
 
   // Environment variables
   const PACKAGE_ID = process.env.NEXT_PUBLIC_PACKAGE_ID || '0x0';
@@ -306,9 +308,13 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-8">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-czar-gold to-caesar-bronze rounded-sm"></div>
+              <img 
+                src="/logo.svg" 
+                alt="CatsinoFun Logo" 
+                className="w-8 h-8" 
+              />
               <span className="font-light text-xl tracking-wide text-gray-900">
-                CatsinofunSui
+                CatsinoFun
               </span>
             </div>
           </div>
@@ -372,21 +378,43 @@ export default function Home() {
                 <div className="lg:col-span-2 text-center space-y-8">
                   <div className="relative">
                     <div className="absolute inset-0 bg-gradient-to-r from-caesar-gold/10 via-caesar-cream/5 to-czar-bronze/10 rounded-full blur-3xl animate-pulse"></div>
-                    <img 
-                      src="/logo.svg" 
-                      alt="Caesar the Cat" 
-                      className={`w-72 h-72 mx-auto filter drop-shadow-2xl relative z-10 transition-all duration-1000 ${
-                        isPlaying 
-                          ? 'animate-spin scale-110' 
-                          : 'animate-caesar-float'
-                      } ${
-                        lastResult !== null 
-                          ? lastResult.success && lastResult.message.includes('won')
-                            ? 'filter brightness-110 saturate-150' 
-                            : 'filter grayscale brightness-75'
-                          : ''
-                      }`}
-                    />
+                    
+                    {/* Coin Flip Animation */}
+                    <div className="relative w-72 h-72 mx-auto" style={{ perspective: '1000px' }}>
+                      <div className={`w-full h-full relative transition-all duration-1000 ${isPlaying ? 'animate-coin-flip' : 'animate-caesar-float'}`} style={{ transformStyle: 'preserve-3d' }}>
+                        
+                        {/* Heads Side */}
+                        <div className="absolute inset-0 w-full h-full backface-hidden" style={{ backfaceVisibility: 'hidden' }}>
+                          <img 
+                            src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/heads.webp" 
+                            alt="Coin Heads" 
+                            className={`w-full h-full object-contain filter drop-shadow-2xl ${
+                              lastResult !== null 
+                                ? lastResult.success && lastResult.message.includes('won')
+                                  ? 'filter brightness-110 saturate-150' 
+                                  : 'filter grayscale brightness-75'
+                                : ''
+                            }`}
+                          />
+                        </div>
+                        
+                        {/* Tails Side */}
+                        <div className="absolute inset-0 w-full h-full backface-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                          <img 
+                            src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/tails.webp" 
+                            alt="Coin Tails" 
+                            className={`w-full h-full object-contain filter drop-shadow-2xl ${
+                              lastResult !== null 
+                                ? lastResult.success && lastResult.message.includes('won')
+                                  ? 'filter brightness-110 saturate-150' 
+                                  : 'filter grayscale brightness-75'
+                                : ''
+                            }`}
+                          />
+                        </div>
+                        
+                      </div>
+                    </div>
                   </div>
                   
                   <div className="space-y-4">
@@ -447,30 +475,34 @@ export default function Home() {
                     <div className={`text-xl font-mono mb-4 ${houseBalance > 0 ? 'text-green-600' : 'text-red-500'}`}>
                       {houseBalance.toFixed(3)} SUI
                     </div>
-                    {houseBalance > 0 && (
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                        <div className="space-y-2">
-                          <div className="text-yellow-600 font-medium text-sm">⚠️ House has coins but they're not in the internal balance</div>
-                          <div className="text-yellow-600 text-xs">
-                            The smart contract can only use funds added through the fund_house function. 
-                            Direct transfers to the house address aren't accessible for betting.
+                    {pathname === '/makaveli' && (
+                      <>
+                        {houseBalance > 0 && (
+                          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div className="space-y-2">
+                              <div className="text-yellow-600 font-medium text-sm">⚠️ House has coins but they're not in the internal balance</div>
+                              <div className="text-yellow-600 text-xs">
+                                The smart contract can only use funds added through the fund_house function. 
+                                Direct transfers to the house address aren't accessible for betting.
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="space-y-3">
+                            <div className="text-blue-600 font-medium text-sm">🏦 Add more funds to house</div>
+                            <button
+                              onClick={handleFundHouse}
+                              disabled={isFunding}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors text-sm"
+                            >
+                              {isFunding ? 'Funding...' : 'Fund House (1 SUI)'}
+                            </button>
                           </div>
                         </div>
-                      </div>
+                      </>
                     )}
-                    
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="space-y-3">
-                        <div className="text-blue-600 font-medium text-sm">🏦 Add more funds to house</div>
-                        <button
-                          onClick={handleFundHouse}
-                          disabled={isFunding}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors text-sm"
-                        >
-                          {isFunding ? 'Funding...' : 'Fund House (1 SUI)'}
-                        </button>
-                      </div>
-                    </div>
                   </div>
 
                   {/* Flip Button */}

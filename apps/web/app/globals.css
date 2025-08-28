@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes coin-flip {
+  0% { transform: rotateY(0deg) translateY(0px); }
+  25% { transform: rotateY(90deg) translateY(-20px); }
+  50% { transform: rotateY(180deg) translateY(-30px); }
+  75% { transform: rotateY(270deg) translateY(-20px); }
+  100% { transform: rotateY(360deg) translateY(0px); }
+}
+
+@keyframes caesar-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-coin-flip {
+  animation: coin-flip 3s ease-in-out infinite;
+}
+
+.animate-caesar-float {
+  animation: caesar-float 3s ease-in-out infinite;
+}
+
 /* Custom modal styles for dapp-kit */
 .sui-wallet-modal {
   position: fixed;
