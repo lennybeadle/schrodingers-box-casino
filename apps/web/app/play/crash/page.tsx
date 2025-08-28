@@ -25,6 +25,7 @@ export default function CrashPage() {
   const [targetMultiplier, setTargetMultiplier] = useState<number>(200); // 2.00x
   const [isPlaying, setIsPlaying] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [currentMultiplier, setCurrentMultiplier] = useState<number>(100); // 1.00x
   const [lastResult, setLastResult] = useState<{ 
     success: boolean; 
     message: string; 
@@ -57,6 +58,42 @@ export default function CrashPage() {
     { label: '3.00×', value: 300 },
     { label: '5.00×', value: 500 },
   ];
+
+  // Multiplier counting effect during animation
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+    let startTime: number | null = null;
+    
+    if (isAnimating) {
+      setCurrentMultiplier(100); // Start at 1.00x
+      startTime = Date.now();
+      
+      intervalId = setInterval(() => {
+        setCurrentMultiplier(prev => {
+          const elapsed = Date.now() - (startTime || 0);
+          
+          // Create a realistic crash curve - multiplier increases faster early on, then slows
+          const timeInSeconds = elapsed / 1000;
+          const baseMultiplier = 100 + (timeInSeconds * 30) + (Math.pow(timeInSeconds, 1.5) * 10);
+          
+          // Add some randomness for realism
+          const randomVariation = (Math.random() - 0.5) * 5;
+          const newMultiplier = baseMultiplier + randomVariation;
+          
+          // Cap at a reasonable maximum for display purposes
+          return Math.min(newMultiplier, 1000);
+        });
+      }, 50); // Update every 50ms for smooth counting
+    } else {
+      setCurrentMultiplier(100); // Reset when not animating
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isAnimating]);
 
   // Calculate potential payout with 3% house edge (97% payout)
   const calculatePayout = (stake: number, target: number) => {
@@ -315,6 +352,9 @@ export default function CrashPage() {
 
             // Wait for animation to complete
             setTimeout(() => {
+              // Set the final crash multiplier before stopping animation
+              setCurrentMultiplier(crashMultiplier);
+              
               setLastResult({
                 success: true,
                 message: isWinner 
@@ -326,9 +366,13 @@ export default function CrashPage() {
                 isWinner,
                 payout
               });
-              setIsAnimating(false);
-              setIsPlaying(false);
-              checkHouseBalance();
+              
+              // Stop animation after a brief moment to show the final multiplier
+              setTimeout(() => {
+                setIsAnimating(false);
+                setIsPlaying(false);
+                checkHouseBalance();
+              }, 500);
             }, 3000);
           },
           onError: (error) => {
@@ -464,7 +508,7 @@ export default function CrashPage() {
                       {isAnimating && (
                         <div className="absolute top-4 right-4 bg-black/90 text-white px-4 py-2 rounded-lg backdrop-blur">
                           <div className="text-xl font-mono font-bold text-green-400">
-                            {((Math.random() * (targetMultiplier - 100) + 100) / 100).toFixed(2)}×
+                            {(currentMultiplier / 100).toFixed(2)}×
                           </div>
                         </div>
                       )}
