@@ -2,8 +2,8 @@ import './globals.css';
 import { SuiWalletProvider } from './providers/SuiWalletProvider';
 
 export const metadata = {
-  title: "CATSINO - Caesar's Casino on Sui",
-  description: "Quantum cat coin flip on Sui - 49% win rate, instant payouts, much cheaper than Solana",
+  title: "CatsinoFun - Purr-fect Casino Games on Sui",
+  description: "The ultimate cat-themed casino on Sui blockchain. Play CatFlip CoinFlip and Revolver Roulette with instant payouts, provably fair outcomes, and feline fun!",
 };
 
 export default function RootLayout({

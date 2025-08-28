@@ -14,10 +14,10 @@ export function BettingPanel({
   setBetAmount,
   multiplier,
   isPlaying,
-  minBet = 0.001,
+  minBet = 0.1,
   gameName,
 }: BettingPanelProps) {
-  const chips = ['0.001', '0.01', '0.05', '0.1'];
+  const chips = ['0.1', '0.5', '1.0', '5.0'];
 
   return (
     <div className="bg-white/80 backdrop-blur rounded-2xl p-8 border border-gray-100 shadow-sm space-y-6">
@@ -48,7 +48,7 @@ export function BettingPanel({
             type="number"
             value={betAmount}
             onChange={(e) => setBetAmount(e.target.value)}
-            step="0.001"
+            step="0.1"
             min={minBet}
             disabled={isPlaying}
             className="w-full text-3xl font-light text-center py-4 bg-transparent border-0 border-b-2 border-gray-200 focus:border-czar-gold focus:outline-none focus:ring-0 transition-colors duration-500 font-mono"

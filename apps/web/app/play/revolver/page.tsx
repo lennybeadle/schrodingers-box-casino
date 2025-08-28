@@ -21,7 +21,7 @@ export default function RevolverPage() {
   const HOUSE_OBJECT_ID = process.env.NEXT_PUBLIC_HOUSE_OBJECT_ID || '0x0';
   const NETWORK = process.env.NEXT_PUBLIC_SUI_NETWORK || 'testnet';
   
-  const [betAmount, setBetAmount] = useState<string>('0.01');
+  const [betAmount, setBetAmount] = useState<string>('0.1');
   const [isSpinning, setIsSpinning] = useState(false);
   const [lastResult, setLastResult] = useState<{ 
     success: boolean; 
@@ -32,6 +32,11 @@ export default function RevolverPage() {
     payout?: number;
   } | null>(null);
   const [houseBalance, setHouseBalance] = useState<number>(0);
+  const [isFunding, setIsFunding] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState<string>('0.1');
+  const [passcode, setPasscode] = useState<string>('');
+  const [showPasscodeModal, setShowPasscodeModal] = useState(false);
 
   // Check house balance
   const checkHouseBalance = async () => {
@@ -52,6 +57,125 @@ export default function RevolverPage() {
       setHouseBalance(internalBalance);
     } catch (error) {
       console.error('Error checking house balance:', error);
+    }
+  };
+
+  // Fund the house
+  const handleFundHouse = async () => {
+    if (!currentAccount) {
+      alert('Please connect your Sui wallet first');
+      return;
+    }
+
+    setIsFunding(true);
+    try {
+      const fundAmount = 1.0; // Fund with 1 SUI
+      const amountMist = Math.floor(fundAmount * 1_000_000_000);
+
+      // Create transaction to fund house
+      const txb = new Transaction();
+      const [coin] = txb.splitCoins(txb.gas, [amountMist]);
+      
+      txb.moveCall({
+        target: `${PACKAGE_ID}::casino::fund_house`,
+        arguments: [
+          txb.object(HOUSE_OBJECT_ID),
+          coin,
+        ],
+      });
+
+      console.log('Funding house with 1 SUI...');
+
+      const result = await new Promise((resolve, reject) => {
+        signAndExecuteTransaction(
+          { transaction: txb },
+          {
+            onSuccess: (data) => {
+              console.log('House funding successful:', data);
+              resolve(data);
+            },
+            onError: (error) => {
+              console.error('House funding failed:', error);
+              reject(error);
+            },
+          }
+        );
+      });
+
+      alert('🏦 House funded successfully! You can now place bets.');
+      checkHouseBalance(); // Refresh balance
+
+    } catch (error: any) {
+      console.error('Fund house failed:', error);
+      alert(`Failed to fund house: ${error.message || 'Unknown error'}`);
+    } finally {
+      setIsFunding(false);
+    }
+  };
+
+  // Initiate withdrawal with passcode prompt
+  const initiateWithdrawal = () => {
+    setShowPasscodeModal(true);
+    setPasscode('');
+  };
+
+  // Withdraw profits from the house (after passcode verification)
+  const handleWithdrawProfits = async () => {
+    if (!currentAccount) {
+      alert('Please connect your Sui wallet first');
+      return;
+    }
+
+    // Verify passcode
+    const correctPasscode = process.env.NEXT_PUBLIC_ADMIN_PASSCODE || '21563';
+    if (passcode !== correctPasscode) {
+      alert('❌ Invalid passcode');
+      return;
+    }
+
+    setIsWithdrawing(true);
+    setShowPasscodeModal(false);
+    try {
+      const withdrawAmountSui = parseFloat(withdrawAmount);
+      const withdrawAmountMist = Math.floor(withdrawAmountSui * 1_000_000_000);
+
+      // Create transaction to withdraw profits
+      const txb = new Transaction();
+      
+      txb.moveCall({
+        target: `${PACKAGE_ID}::casino::withdraw_profits`,
+        arguments: [
+          txb.object(HOUSE_OBJECT_ID),
+          txb.pure(withdrawAmountMist),
+        ],
+      });
+
+      console.log(`Withdrawing ${withdrawAmountSui} SUI from house...`);
+
+      const result = await new Promise((resolve, reject) => {
+        signAndExecuteTransaction(
+          { transaction: txb },
+          {
+            onSuccess: (data) => {
+              console.log('Withdrawal successful:', data);
+              resolve(data);
+            },
+            onError: (error) => {
+              console.error('Withdrawal failed:', error);
+              reject(error);
+            },
+          }
+        );
+      });
+
+      alert(`💰 Successfully withdrew ${withdrawAmountSui} SUI from house!`);
+      checkHouseBalance(); // Refresh balance
+
+    } catch (error: any) {
+      console.error('Withdraw profits failed:', error);
+      alert(`Failed to withdraw: ${error.message || 'Unknown error'}`);
+    } finally {
+      setIsWithdrawing(false);
     }
   };
 
@@ -231,7 +355,7 @@ export default function RevolverPage() {
       <nav className="relative z-50 px-6 py-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-8">
-            <div className="flex items-center space-x-3">
+            <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
               <img 
                 src="/logo.svg" 
                 alt="CatsinoFun Logo" 
@@ -240,7 +364,7 @@ export default function RevolverPage() {
               <span className="font-light text-xl tracking-wide text-gray-900">
                 CatsinoFun
               </span>
-            </div>
+            </Link>
           </div>
 
           <div className="flex items-center gap-6">
@@ -342,12 +466,53 @@ export default function RevolverPage() {
                     </div>
                   </div>
                   
-                  {pathname === '/makaveli' && (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                      <div className="text-yellow-600 text-xs">
-                        Admin mode: House funding controls available at main game
+                  {pathname.includes('makaveli') && (
+                    <>
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                        <div className="text-yellow-600 text-sm">
+                          ⚠️ Admin Mode: Revolver House Controls
+                        </div>
                       </div>
-                    </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="space-y-3">
+                            <div className="text-blue-600 font-medium text-sm">🏦 Add funds to house</div>
+                            <button
+                              onClick={handleFundHouse}
+                              disabled={isFunding}
+                              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors text-sm"
+                            >
+                              {isFunding ? 'Funding...' : 'Fund House (1 SUI)'}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <div className="space-y-3">
+                            <div className="text-green-600 font-medium text-sm">💰 Withdraw profits</div>
+                            <div className="flex space-x-2">
+                              <input
+                                type="number"
+                                value={withdrawAmount}
+                                onChange={(e) => setWithdrawAmount(e.target.value)}
+                                step="0.01"
+                                min="0.01"
+                                className="flex-1 px-2 py-1 border border-green-300 rounded text-sm"
+                                placeholder="0.1"
+                              />
+                              <button
+                                onClick={initiateWithdrawal}
+                                disabled={isWithdrawing || parseFloat(withdrawAmount) <= 0}
+                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors text-sm"
+                              >
+                                {isWithdrawing ? 'Withdrawing...' : 'Withdraw'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
                   )}
 
                   {/* Spin Button */}
@@ -414,27 +579,102 @@ export default function RevolverPage() {
             <div className="w-16 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
             
             <p className="text-xs text-gray-400 font-mono tracking-wider">
-              Revolver Roulette • 7.76x • 3% House Edge
+              In Memoriam Caesar • $CZAR
             </p>
             
-            <div className="flex items-center justify-center gap-8 text-xs">
-              <Link 
-                href="/" 
-                className="text-gray-400 hover:text-red-600 transition-colors duration-300 font-mono tracking-wide"
+            <div className="flex items-center justify-center gap-6 text-xs">
+              <a 
+                href="https://www.youtube.com/@catsinofun" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-red-600 transition-colors duration-300"
+                title="YouTube"
               >
-                Home
-              </Link>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+              </a>
+              <a 
+                href="https://www.tiktok.com/@catsinofun" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-red-600 transition-colors duration-300"
+                title="TikTok"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-.88-.05A6.33 6.33 0 0 0 5.76 20.3 6.33 6.33 0 0 0 17.47 14.5V6.7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-2.65-1.52z"/>
+                </svg>
+              </a>
+              <a 
+                href="https://x.com/catsinofun" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-red-600 transition-colors duration-300"
+                title="X (Twitter)"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </a>
+              <a 
+                href="https://discord.gg/zaxbFxVBHE" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-red-600 transition-colors duration-300"
+                title="Discord"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0190 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9460 2.4189-2.1568 2.4189Z"/>
+                </svg>
+              </a>
               <div className="w-px h-3 bg-gray-200"></div>
               <Link 
                 href="/play" 
                 className="text-gray-400 hover:text-red-600 transition-colors duration-300 font-mono tracking-wide"
               >
-                Coin Flip
+                Advanced
               </Link>
             </div>
           </div>
         </footer>
       </main>
+
+      {/* Passcode Modal */}
+      {showPasscodeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Enter Admin Passcode</h3>
+            <input
+              type="password"
+              value={passcode}
+              onChange={(e) => setPasscode(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-4"
+              placeholder="Enter passcode"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleWithdrawProfits();
+                }
+              }}
+              autoFocus
+            />
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowPasscodeModal(false)}
+                className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleWithdrawProfits}
+                disabled={!passcode}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

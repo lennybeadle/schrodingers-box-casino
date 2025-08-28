@@ -7,6 +7,7 @@ module catsino::casino {
     use sui::balance::{Self, Balance};
     use sui::random::{Self, Random};
     use sui::event;
+    use sui::package;
 
 
     // Error codes
@@ -62,8 +63,13 @@ module catsino::casino {
     }
 
     // Initialize the house (only called once)
-    fun init(ctx: &mut TxContext) {
+    fun init(otw: OTW, ctx: &mut TxContext) {
         let owner = tx_context::sender(ctx);
+        
+        // Create upgrade cap for future upgrades
+        let upgrade_cap = package::claim(otw, ctx);
+        transfer::public_transfer(upgrade_cap, owner);
+        
         let house = House {
             id: object::new(ctx),
             balance: balance::zero(),
@@ -84,6 +90,9 @@ module catsino::casino {
 
         transfer::share_object(house);
     }
+
+    // One-Time-Witness for upgrade capability
+    public struct OTW has drop {}
 
     // Fund the house (anyone can fund)
     public entry fun fund_house(

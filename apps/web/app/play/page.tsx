@@ -81,7 +81,7 @@ export default function Play() {
       const largestWin = Math.max(...allBetsData.map(bet => bet.payout), 0);
 
       setStats({
-        houseEdge: 3.96, // Fixed 3.96% house edge
+        houseEdge: 3.5, // Combined house edge (3.96% coinflip + 3% revolver average)
         totalVolume24h,
         totalBets24h: bets24h.length,
         avgBetSize,
@@ -133,22 +133,7 @@ export default function Play() {
             </div>
           </Link>
           
-          <div className="flex items-center gap-8">
-            <Link 
-              href="https://www.youtube.com/@catsinofun" 
-              target="_blank" 
-              className="text-gray-400 hover:text-czar-gold transition-colors duration-300 text-sm font-mono tracking-wide"
-            >
-              YouTube
-            </Link>
-            
-            {currentAccount && (
-              <div className="flex items-center gap-2 px-3 py-1 border border-gray-200 rounded-full bg-white">
-                <div className="w-1.5 h-1.5 bg-czar-gold rounded-full animate-pulse"></div>
-                <span className="text-xs font-mono text-gray-500 tracking-wide">Connected</span>
-              </div>
-            )}
-            
+          <div className="flex items-center gap-6">
             <SuiWalletButton />
           </div>
         </div>
@@ -208,10 +193,11 @@ export default function Play() {
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                       <div className="bg-gray-50 rounded-lg p-6 text-center">
-                        <div className="text-2xl font-bold text-czar-gold mb-1">
-                          {stats.houseEdge.toFixed(2)}%
+                        <div className="text-lg font-bold text-czar-gold mb-1">
+                          3.96% | 3.0%
                         </div>
                         <div className="text-sm text-gray-600">House Edge</div>
+                        <div className="text-xs text-gray-500 mt-1">CoinFlip | Revolver</div>
                       </div>
                       <div className="bg-gray-50 rounded-lg p-6 text-center">
                         <div className="text-2xl font-bold text-czar-gold mb-1">
@@ -232,6 +218,7 @@ export default function Play() {
                         <div className="text-sm text-gray-600">Largest Win (SUI)</div>
                       </div>
                     </div>
+
 
                     {/* Recent Activity */}
                     <div className="bg-white border border-gray-200 rounded-lg">
@@ -352,7 +339,7 @@ export default function Play() {
                     href="/"
                     className="inline-block px-8 py-4 bg-gradient-to-r from-czar-gold via-caesar-gold to-czar-bronze text-black font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
                   >
-                    Quick Play Interface
+                    Home
                   </Link>
                 </div>
               </>
