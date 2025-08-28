@@ -592,7 +592,7 @@ export default function CrashPage() {
           success: didWin,
           message: resultMessage,
           txUrl: `https://suiexplorer.com/txblock/${result.digest}?network=${NETWORK}`,
-          crashMultiplier,
+          crashMultiplier: crashMultiplier ?? undefined,
           targetMultiplier,
           isWinner: didWin,
           payout: actualPayout
