@@ -100,6 +100,95 @@ export default function CrashPage() {
     return (stake * target * 0.97) / 100;
   };
 
+  // Check for recent successful transactions when wallet communication fails
+  const checkRecentTransactions = async () => {
+    if (!currentAccount) return;
+    
+    try {
+      console.log('Checking recent transactions for address:', currentAccount.address);
+      
+      // Query recent transactions for the current account
+      const txns = await suiClient.queryTransactionBlocks({
+        filter: { FromAddress: currentAccount.address },
+        options: { 
+          showEvents: true,
+          showEffects: true,
+          showInput: true 
+        },
+        limit: 10
+      });
+      
+      // Look for recent crash game transactions (within last 30 seconds)
+      const now = Date.now();
+      const recentCutoff = now - 30000; // 30 seconds ago
+      
+      for (const tx of txns.data) {
+        const txTime = parseInt(tx.timestampMs || '0');
+        if (txTime < recentCutoff) continue; // Too old
+        
+        // Check if this transaction has crash game events
+        if (tx.events && tx.events.length > 0) {
+          for (const event of tx.events) {
+            if (event.type && event.type.includes('crash::CrashEvent')) {
+              console.log('Found recent crash game transaction:', tx.digest);
+              
+              const eventData = event.parsedJson as any;
+              const crashMultiplier = parseInt(eventData.crash_x100);
+              const isWinner = eventData.win;
+              const payout = parseInt(eventData.payout) / 1_000_000_000;
+              const explorerUrl = `https://suiexplorer.com/txblock/${tx.digest}?network=${NETWORK}`;
+              
+              // Start the animation to show what happened
+              setIsAnimating(true);
+              setCurrentMultiplier(crashMultiplier);
+              
+              // Show the result after animation
+              setTimeout(() => {
+                setLastResult({
+                  success: true,
+                  message: isWinner 
+                    ? `🎉 Found it! You won! Cashed out at ${targetMultiplier / 100}×!`
+                    : `💥 Found it! Crashed at ${crashMultiplier / 100}×! Better luck next time.`,
+                  txUrl: explorerUrl,
+                  crashMultiplier,
+                  targetMultiplier,
+                  isWinner,
+                  payout
+                });
+                
+                // Add to game history
+                setGameHistory(prev => [{
+                  stake: parseFloat(betAmount),
+                  target: targetMultiplier,
+                  crash: crashMultiplier,
+                  win: isWinner,
+                  payout,
+                  txUrl: explorerUrl
+                }, ...prev.slice(0, 4)]);
+                
+                setIsAnimating(false);
+                setIsPlaying(false);
+                checkHouseBalance();
+              }, 3500);
+              
+              return; // Found the transaction, exit
+            }
+          }
+        }
+      }
+      
+      // No recent crash transaction found
+      setLastResult({
+        success: false,
+        message: "⚠️ No recent crash game found in blockchain. Check your wallet history or try again."
+      });
+      
+    } catch (error) {
+      console.error('Error checking recent transactions:', error);
+      throw error;
+    }
+  };
+
   // Check house balance
   const checkHouseBalance = async () => {
     try {
@@ -392,21 +481,25 @@ export default function CrashPage() {
                 errorMessage.includes('listener indicated')) {
               
               // The transaction might have succeeded despite the communication error
-              // Show a message and wait a bit to see if we can find the transaction
               setLastResult({
                 success: false,
-                message: "⚠️ Wallet communication lost. Checking if transaction went through..."
+                message: "⚠️ Wallet communication lost. Checking recent transactions..."
               });
               
-              // Wait a moment and provide helpful guidance
-              setTimeout(() => {
-                setLastResult({
-                  success: false,
-                  message: "⚠️ Connection lost after signing. Check your wallet history - if the transaction succeeded, you'll see the result there. You may need to refresh the page."
-                });
+              // Try to find the transaction in recent blockchain activity
+              setTimeout(async () => {
+                try {
+                  await checkRecentTransactions();
+                } catch (pollError) {
+                  console.error('Failed to check recent transactions:', pollError);
+                  setLastResult({
+                    success: false,
+                    message: "⚠️ Connection lost after signing. Check your wallet history - if the transaction succeeded, you'll see the result there. You may need to refresh the page."
+                  });
+                }
                 setIsAnimating(false);
                 setIsPlaying(false);
-              }, 2000);
+              }, 3000);
               
             } else {
               setLastResult({
