@@ -33,8 +33,8 @@ export function BettingPanel({
               disabled={isPlaying}
               className={`px-4 py-2 rounded-lg transition-all text-sm font-mono ${
                 betAmount === amount
-                  ? 'bg-gradient-to-r from-czar-gold to-caesar-bronze text-white shadow-lg scale-105'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-lg scale-105 ring-2 ring-slate-400/50'
+                  : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 shadow-sm'
               } disabled:opacity-50`}
             >
               {amount} SUI

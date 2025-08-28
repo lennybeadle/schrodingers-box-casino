@@ -41,7 +41,7 @@ export function SuiWalletButton() {
       <>
         <button
           onClick={handleClick}
-          className="relative px-6 py-3 bg-gradient-to-r from-czar-gold via-caesar-gold to-czar-bronze text-black font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+          className="relative px-6 py-3 bg-gradient-to-r from-gray-800 to-gray-900 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 hover:from-gray-700 hover:to-gray-800"
         >
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-red-400 rounded-full"></div>
@@ -122,7 +122,7 @@ export function SuiWalletButton() {
   return (
     <button
       onClick={handleClick}
-      className="relative px-6 py-3 bg-gradient-to-r from-czar-gold via-caesar-gold to-czar-bronze text-black font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+      className="relative px-6 py-3 bg-gradient-to-r from-gray-700 to-gray-800 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 hover:from-gray-600 hover:to-gray-700"
     >
       <div className="flex items-center space-x-2">
         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>

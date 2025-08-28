@@ -10,7 +10,7 @@ interface Game {
 }
 
 const games: Game[] = [
-  { path: '/', name: 'Coin Flip', icon: '🪙' },
+  { path: '/play/coinflip', name: 'Coin Flip', icon: '🪙' },
   { path: '/play/revolver', name: 'Revolver', icon: '🔫' },
 ];
 

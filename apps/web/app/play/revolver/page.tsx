@@ -208,6 +208,25 @@ export default function RevolverPage() {
   return (
     <div className="min-h-screen bg-white relative">
       <GameNavigation />
+      
+      {/* Network Status Banner */}
+      <div className={`px-6 py-3 ${
+        NETWORK === 'mainnet' 
+          ? 'bg-green-500/10 border-green-500/20' 
+          : 'bg-blue-500/10 border-blue-500/20'
+      }`}>
+        <div className="max-w-7xl mx-auto text-center">
+          <p className={`text-sm font-medium ${
+            NETWORK === 'mainnet' ? 'text-green-600' : 'text-blue-600'
+          }`}>
+            {NETWORK === 'mainnet' 
+              ? '🚀 SUI MAINNET - Real SUI betting with ultra-low fees!'
+              : '🌊 SUI TESTNET - Use testnet SUI for testing • Much cheaper than Solana!'
+            }
+          </p>
+        </div>
+      </div>
+      
       {/* Navigation Header */}
       <nav className="relative z-50 px-6 py-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -249,8 +268,7 @@ export default function RevolverPage() {
               <div className="space-y-8">
                 <div className="space-y-4">
                   <h1 className="text-6xl font-thin text-gray-900 tracking-tight leading-tight">
-                    Revolver<br/>
-                    <span className="text-red-600">Roulette</span>
+                    Revolver <span className="text-red-600">Roulette</span>
                   </h1>
                   <p className="text-lg text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
                     Russian roulette meets quantum probability. 
@@ -297,8 +315,13 @@ export default function RevolverPage() {
                   </div>
                 </div>
 
+                {/* Vertical Divider */}
+                <div className="hidden lg:block lg:col-span-1">
+                  <div className="w-px h-96 bg-gradient-to-b from-transparent via-gray-200 to-transparent mx-auto"></div>
+                </div>
+
                 {/* Right - Controls */}
-                <div className="lg:col-span-3 space-y-8">
+                <div className="lg:col-span-2 space-y-8">
                   
                   {/* Betting Panel */}
                   <BettingPanel
@@ -310,8 +333,13 @@ export default function RevolverPage() {
                   />
                   
                   {/* House Balance */}
-                  <div className="text-center text-sm text-gray-600">
-                    House Balance: <span className="font-mono">{houseBalance.toFixed(3)} SUI</span>
+                  <div className="text-center py-4 border-t border-gray-100">
+                    <div className="text-sm text-gray-500 uppercase tracking-widest mb-2">
+                      House Balance
+                    </div>
+                    <div className={`text-xl font-mono ${houseBalance > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                      {houseBalance.toFixed(3)} SUI
+                    </div>
                   </div>
                   
                   {pathname === '/makaveli' && (
