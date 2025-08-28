@@ -375,7 +375,7 @@ export default function CrashPage() {
               }, 500);
             }, 3000);
           },
-          onError: (error) => {
+          onError: async (error) => {
             console.error('Crash game failed:', error);
             
             // Check if this might be a wallet communication error after signing
@@ -383,19 +383,32 @@ export default function CrashPage() {
             if (errorMessage.includes('channel closed') || 
                 errorMessage.includes('Unexpected error') ||
                 errorMessage.includes('listener indicated')) {
+              
+              // The transaction might have succeeded despite the communication error
+              // Show a message and wait a bit to see if we can find the transaction
               setLastResult({
                 success: false,
-                message: "⚠️ Wallet closed unexpectedly. If you signed the transaction, it may still be processing. Check your wallet history."
+                message: "⚠️ Wallet communication lost. Checking if transaction went through..."
               });
+              
+              // Wait a moment and provide helpful guidance
+              setTimeout(() => {
+                setLastResult({
+                  success: false,
+                  message: "⚠️ Connection lost after signing. Check your wallet history - if the transaction succeeded, you'll see the result there. You may need to refresh the page."
+                });
+                setIsAnimating(false);
+                setIsPlaying(false);
+              }, 2000);
+              
             } else {
               setLastResult({
                 success: false,
                 message: `Game failed: ${errorMessage}`
               });
+              setIsAnimating(false);
+              setIsPlaying(false);
             }
-            
-            setIsAnimating(false);
-            setIsPlaying(false);
           },
         },
       );
