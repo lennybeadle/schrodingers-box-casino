@@ -201,9 +201,13 @@ export default function Home() {
       console.log('Events array:', events);
       console.log('Events length:', events.length);
       
-      // Also try to get events from the transaction digest
+      // Also try to get events from the transaction digest (with retry for indexing delay)
       try {
         console.log('Fetching events from transaction digest...');
+        
+        // Add small delay for blockchain indexing
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         const txResult = await suiClient.getTransactionBlock({
           digest: result.digest,
           options: { showEvents: true }
@@ -240,6 +244,12 @@ export default function Home() {
         }
       } catch (eventError) {
         console.error('Error fetching events:', eventError);
+        
+        // If we can't fetch events due to indexing delay, show generic success message
+        if (eventError instanceof Error && eventError.message && eventError.message.includes('Could not find the referenced transaction')) {
+          console.log('💡 Transaction too new for indexing - showing generic success');
+          message = 'Bet placed successfully! Check the advanced interface for results once indexing completes.';
+        }
       }
 
       const explorerUrl = NETWORK === 'mainnet' 
