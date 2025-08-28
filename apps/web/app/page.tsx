@@ -381,7 +381,15 @@ export default function Home() {
                     
                     {/* Coin Flip Animation */}
                     <div className="relative w-72 h-72 mx-auto" style={{ perspective: '1000px' }}>
-                      <div className={`w-full h-full relative transition-all duration-1000 ${isPlaying ? 'animate-coin-flip' : 'animate-caesar-float'}`} style={{ transformStyle: 'preserve-3d' }}>
+                      <div 
+                        className={`w-full h-full relative transition-all duration-1000 ${isPlaying ? 'animate-coin-flip' : 'animate-caesar-float'}`} 
+                        style={{ 
+                          transformStyle: 'preserve-3d',
+                          transform: !isPlaying && lastResult !== null 
+                            ? (lastResult.success && lastResult.message.includes('won') ? 'rotateX(0deg)' : 'rotateX(180deg)')
+                            : 'rotateX(0deg)'
+                        }}
+                      >
                         
                         {/* Heads Side */}
                         <div className="absolute inset-0 w-full h-full backface-hidden" style={{ backfaceVisibility: 'hidden' }}>
