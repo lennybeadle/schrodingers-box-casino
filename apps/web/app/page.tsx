@@ -196,35 +196,50 @@ export default function Home() {
 
       console.log('Raw transaction result:', result);
 
-      // Check both result.events and result.objectChanges for events
+      // Enhanced event parsing for new contract
       const events = result.events || [];
-      if (events.length > 0) {
-        console.log('Found events:', events);
-        for (const event of events) {
-          console.log('Event type:', event.type);
-          console.log('Event data:', event.parsedJson);
-          
-          if (event.type && event.type.includes('BetPlaced')) {
-            const eventData = event.parsedJson as any;
-            isWinner = eventData.is_winner;
-            payout = parseInt(eventData.payout) / 1_000_000_000; // Convert MIST to SUI
-            randomValue = parseInt(eventData.random_value);
+      console.log('Events array:', events);
+      console.log('Events length:', events.length);
+      
+      // Also try to get events from the transaction digest
+      try {
+        console.log('Fetching events from transaction digest...');
+        const txResult = await suiClient.getTransactionBlock({
+          digest: result.digest,
+          options: { showEvents: true }
+        });
+        
+        console.log('Transaction events:', txResult.events);
+        
+        if (txResult.events && txResult.events.length > 0) {
+          for (const event of txResult.events) {
+            console.log('Event type:', event.type);
+            console.log('Event data:', event.parsedJson);
             
-            console.log('✅ BetPlaced event found!', {
-              isWinner,
-              payout: eventData.payout,
-              randomValue,
-              winThreshold: 49 // Old contract threshold
-            });
-            
-            message = isWinner 
-              ? `🎉 Caesar Lives! You won ${payout.toFixed(3)} SUI! (Random: ${randomValue})` 
-              : `⚱️ Caesar Falls! You lost. (Random: ${randomValue}, needed ≤ 49)`;
-            break;
+            if (event.type && event.type.includes('BetPlaced')) {
+              const eventData = event.parsedJson as any;
+              isWinner = eventData.is_winner;
+              payout = parseInt(eventData.payout) / 1_000_000_000; // Convert MIST to SUI
+              randomValue = parseInt(eventData.random_value);
+              
+              console.log('✅ BetPlaced event found via digest!', {
+                isWinner,
+                payout: eventData.payout,
+                randomValue,
+                winThreshold: 47 // New contract threshold
+              });
+              
+              message = isWinner 
+                ? `🎉 Caesar Lives! You won ${payout.toFixed(3)} SUI! (Random: ${randomValue})` 
+                : `⚱️ Caesar Falls! You lost. (Random: ${randomValue}, needed ≤ 47)`;
+              break;
+            }
           }
+        } else {
+          console.log('❌ No events found via transaction digest either');
         }
-      } else {
-        console.log('❌ No events found in transaction result');
+      } catch (eventError) {
+        console.error('Error fetching events:', eventError);
       }
 
       const explorerUrl = NETWORK === 'mainnet' 
