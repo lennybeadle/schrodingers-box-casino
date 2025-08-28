@@ -8,6 +8,7 @@ module catsino::casino {
     use sui::random::{Self, Random};
     use sui::event;
 
+
     // Error codes
     const EInsufficientFunds: u64 = 1;
     const EInvalidBetAmount: u64 = 2;
@@ -234,5 +235,38 @@ module catsino::casino {
     // Check if an address is the house owner
     public fun is_house_owner(house: &House, addr: address): bool {
         house.owner == addr
+    }
+
+    // Generic function for other game modules to process bets
+    public fun process_game_bet(
+        house: &mut House,
+        payment: Coin<SUI>,
+        is_winner: bool,
+        payout_amount: u64,
+        ctx: &mut TxContext
+    ): u64 {
+        let player = tx_context::sender(ctx);
+        let stake = coin::value(&payment);
+        
+        // Add player's bet to house balance
+        balance::join(&mut house.balance, coin::into_balance(payment));
+        
+        let actual_payout = if (is_winner) {
+            // Player wins - pay out from house
+            let payout_balance = balance::split(&mut house.balance, payout_amount);
+            let payout_coin = coin::from_balance(payout_balance, ctx);
+            transfer::public_transfer(payout_coin, player);
+            house.total_wins = house.total_wins + 1;
+            payout_amount
+        } else {
+            // Player loses - house keeps the bet
+            0
+        };
+        
+        // Update statistics
+        house.total_bets = house.total_bets + 1;
+        house.total_volume = house.total_volume + stake;
+        
+        actual_payout
     }
 }

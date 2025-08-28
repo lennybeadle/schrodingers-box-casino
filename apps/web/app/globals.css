@@ -32,6 +32,35 @@
   animation: spin-fast 0.1s linear infinite;
 }
 
+/* Page transition animations */
+@keyframes slide-left-out {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-100%); opacity: 0; }
+}
+
+@keyframes slide-left-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slide-right-out {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes slide-right-in {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+body.slide-left main {
+  animation: slide-left-out 0.3s ease-in-out;
+}
+
+body.slide-right main {
+  animation: slide-right-out 0.3s ease-in-out;
+}
+
 /* Custom modal styles for dapp-kit */
 .sui-wallet-modal {
   position: fixed;

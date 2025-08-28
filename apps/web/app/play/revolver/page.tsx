@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { SuiWalletButton } from '@/components/SuiWalletButton';
 import { Spinner } from '@/components/Spinner';
+import { BettingPanel } from '@/components/BettingPanel';
+import { GameNavigation } from '@/components/GameNavigation';
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 
@@ -205,6 +207,7 @@ export default function RevolverPage() {
 
   return (
     <div className="min-h-screen bg-white relative">
+      <GameNavigation />
       {/* Navigation Header */}
       <nav className="relative z-50 px-6 py-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -298,59 +301,26 @@ export default function RevolverPage() {
                 <div className="lg:col-span-3 space-y-8">
                   
                   {/* Betting Panel */}
-                  <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-6">
-                    <div className="space-y-4">
-                      <h3 className="text-xl font-light text-gray-900">Place Your Bet</h3>
-                      
-                      {/* Chip Selection */}
-                      <div className="flex gap-3">
-                        {['0.001', '0.01', '0.05'].map((amount) => (
-                          <button
-                            key={amount}
-                            onClick={() => setBetAmount(amount)}
-                            className={`px-4 py-2 rounded-lg transition-all text-sm font-mono ${
-                              betAmount === amount
-                                ? 'bg-red-600 text-white shadow-lg'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            {amount} SUI
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Custom Amount */}
-                      <div className="space-y-2">
-                        <input
-                          type="number"
-                          step="0.001"
-                          min="0.001"
-                          value={betAmount}
-                          onChange={(e) => setBetAmount(e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-lg font-mono text-gray-900 focus:outline-none focus:border-red-500"
-                          placeholder="Custom amount"
-                        />
-                        <p className="text-xs text-gray-500">
-                          Potential payout: <span className="font-mono text-red-600">
-                            {(parseFloat(betAmount || '0') * 7.76).toFixed(3)} SUI
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* House Balance */}
-                    <div className="text-sm text-gray-600">
-                      House Balance: <span className="font-mono">{houseBalance.toFixed(3)} SUI</span>
-                    </div>
-                    
-                    {pathname === '/makaveli' && (
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                        <div className="text-yellow-600 text-xs">
-                          Admin mode: House funding controls available at main game
-                        </div>
-                      </div>
-                    )}
+                  <BettingPanel
+                    betAmount={betAmount}
+                    setBetAmount={setBetAmount}
+                    multiplier={7.76}
+                    isPlaying={isSpinning}
+                    gameName="Revolver Roulette"
+                  />
+                  
+                  {/* House Balance */}
+                  <div className="text-center text-sm text-gray-600">
+                    House Balance: <span className="font-mono">{houseBalance.toFixed(3)} SUI</span>
                   </div>
+                  
+                  {pathname === '/makaveli' && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <div className="text-yellow-600 text-xs">
+                        Admin mode: House funding controls available at main game
+                      </div>
+                    </div>
+                  )}
 
                   {/* Spin Button */}
                   <div className="space-y-6">
@@ -403,21 +373,6 @@ export default function RevolverPage() {
                       </div>
                     )}
 
-                    {/* Navigation */}
-                    <div className="text-center pt-4 flex justify-between">
-                      <Link 
-                        href="/play" 
-                        className="text-sm text-gray-400 hover:text-red-600 transition-colors duration-300 font-mono tracking-wide"
-                      >
-                        ← Coin Flip
-                      </Link>
-                      <Link 
-                        href="/" 
-                        className="text-sm text-gray-400 hover:text-red-600 transition-colors duration-300 font-mono tracking-wide"
-                      >
-                        Home →
-                      </Link>
-                    </div>
                   </div>
                 </div>
               </div>

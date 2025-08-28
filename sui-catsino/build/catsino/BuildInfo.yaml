@@ -5,7 +5,7 @@ compiled_package_info:
     catsino: "0000000000000000000000000000000000000000000000000000000000000000"
     std: "0000000000000000000000000000000000000000000000000000000000000001"
     sui: "0000000000000000000000000000000000000000000000000000000000000002"
-  source_digest: 8A31741B20EC08CB25B03AB5918D02537DB4CC7CBF51E097EC0F1AEFF440AAB0
+  source_digest: 336B3CFB4C5452DE66E3531E7D639E91D4459530EE81A26748948731AD04F064
   build_flags:
     dev_mode: false
     test_mode: false
@@ -33,7 +33,7 @@ compiled_package_info:
           kind:
             Git:
               git_url: "https://github.com/MystenLabs/sui.git"
-              git_rev: db951a5ea6b125f6253a6b7f436ddba46eb0feb3
+              git_rev: 2cde80b5766b0bc2073908e10f6e3c81c93fd691
               subdir: crates/sui-framework/packages/bridge
           subst: ~
           digest: ~
@@ -43,7 +43,7 @@ compiled_package_info:
           kind:
             Git:
               git_url: "https://github.com/MystenLabs/sui.git"
-              git_rev: db951a5ea6b125f6253a6b7f436ddba46eb0feb3
+              git_rev: 2cde80b5766b0bc2073908e10f6e3c81c93fd691
               subdir: crates/sui-framework/packages/move-stdlib
           subst: ~
           digest: ~
@@ -53,7 +53,7 @@ compiled_package_info:
           kind:
             Git:
               git_url: "https://github.com/MystenLabs/sui.git"
-              git_rev: db951a5ea6b125f6253a6b7f436ddba46eb0feb3
+              git_rev: 2cde80b5766b0bc2073908e10f6e3c81c93fd691
               subdir: crates/sui-framework/packages/sui-framework
           subst: ~
           digest: ~
@@ -63,7 +63,7 @@ compiled_package_info:
           kind:
             Git:
               git_url: "https://github.com/MystenLabs/sui.git"
-              git_rev: db951a5ea6b125f6253a6b7f436ddba46eb0feb3
+              git_rev: 2cde80b5766b0bc2073908e10f6e3c81c93fd691
               subdir: crates/sui-framework/packages/sui-system
           subst: ~
           digest: ~

@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { SuiWalletButton } from '@/components/SuiWalletButton';
+import { BettingPanel } from '@/components/BettingPanel';
+import { GameNavigation } from '@/components/GameNavigation';
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 
@@ -285,6 +287,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
+      <GameNavigation />
       {/* Sui Network Banner */}
       <div className={`border-b px-6 py-2 ${
         NETWORK === 'mainnet' 
@@ -441,39 +444,14 @@ export default function Home() {
                 {/* Right - The Interface */}
                 <div className="lg:col-span-2 space-y-12">
                   
-                  {/* Bet Input - Architectural Beauty */}
-                  <div className="space-y-8">
-                    <div className="text-center">
-                      <h3 className="text-2xl font-thin text-gray-700 mb-2">Wager</h3>
-                      <div className="w-12 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
-                    </div>
-                    
-                    <div className="relative">
-                      <input 
-                        type="number"
-                        value={betAmount}
-                        onChange={(e) => setBetAmount(e.target.value)}
-                        step="0.001"
-                        min="0.001"
-                        disabled={isPlaying}
-                        className="w-full text-4xl font-light text-center py-6 bg-transparent border-0 border-b-2 border-gray-200 focus:border-czar-gold focus:outline-none focus:ring-0 transition-colors duration-500 font-mono"
-                        placeholder="0.000"
-                      />
-                      <div className="absolute right-0 bottom-2 text-gray-400 font-mono text-lg">
-                        SUI
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Potential Win - Elegant Display */}
-                  <div className="text-center py-6">
-                    <div className="text-sm text-gray-500 uppercase tracking-widest mb-2">
-                      Potential Win
-                    </div>
-                    <div className="text-3xl font-light text-czar-gold font-mono">
-                      {(parseFloat(betAmount || '0') * 2.0).toFixed(3)} SUI
-                    </div>
-                  </div>
+                  {/* Betting Panel */}
+                  <BettingPanel
+                    betAmount={betAmount}
+                    setBetAmount={setBetAmount}
+                    multiplier={2.0}
+                    isPlaying={isPlaying}
+                    gameName="Emperor's Coin Flip"
+                  />
 
                   {/* House Balance & Funding */}
                   <div className="text-center py-4 border-t border-gray-100">
@@ -567,19 +545,8 @@ export default function Home() {
                       </div>
                     )}
 
-                    {/* Game Navigation */}
-                    <div className="text-center pt-4 space-y-3">
-                      <div className="flex justify-center gap-8 text-sm">
-                        <div className="text-czar-gold font-mono">
-                          • Coin Flip
-                        </div>
-                        <Link 
-                          href="/play/revolver" 
-                          className="text-gray-400 hover:text-red-600 transition-colors duration-300 font-mono tracking-wide"
-                        >
-                          Revolver Roulette →
-                        </Link>
-                      </div>
+                    {/* Advanced Interface Link */}
+                    <div className="text-center pt-4">
                       <Link 
                         href="/play" 
                         className="text-sm text-gray-400 hover:text-czar-gold transition-colors duration-300 font-mono tracking-wide"
