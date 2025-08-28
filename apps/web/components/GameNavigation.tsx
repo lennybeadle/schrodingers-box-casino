@@ -92,7 +92,7 @@ export function GameNavigation() {
         <button
           onClick={() => navigateToGame('left')}
           disabled={isTransitioning}
-          className="fixed left-4 top-1/2 transform -translate-y-1/2 z-50 p-3 bg-white/90 backdrop-blur rounded-full shadow-lg hover:scale-110 transition-all duration-300 group disabled:opacity-50"
+          className="fixed left-4 top-1/2 transform -translate-y-1/2 z-50 p-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-full shadow-lg hover:scale-110 transition-all duration-300 group disabled:opacity-50 border border-gray-200/50 dark:border-gray-700/50"
           aria-label="Previous game"
         >
           <svg 
@@ -100,7 +100,7 @@ export function GameNavigation() {
             height="24" 
             viewBox="0 0 24 24" 
             fill="none" 
-            className="text-gray-600 group-hover:text-czar-gold transition-colors"
+            className="text-gray-600 dark:text-gray-300 group-hover:text-czar-gold transition-colors"
           >
             <path 
               d="M15 18L9 12L15 6" 
@@ -110,7 +110,7 @@ export function GameNavigation() {
               strokeLinejoin="round"
             />
           </svg>
-          <span className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+          <span className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-black/80 dark:bg-gray-700/90 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
             {games[currentIndex - 1]?.name}
           </span>
         </button>
@@ -121,7 +121,7 @@ export function GameNavigation() {
         <button
           onClick={() => navigateToGame('right')}
           disabled={isTransitioning}
-          className="fixed right-4 top-1/2 transform -translate-y-1/2 z-50 p-3 bg-white/90 backdrop-blur rounded-full shadow-lg hover:scale-110 transition-all duration-300 group disabled:opacity-50"
+          className="fixed right-4 top-1/2 transform -translate-y-1/2 z-50 p-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-full shadow-lg hover:scale-110 transition-all duration-300 group disabled:opacity-50 border border-gray-200/50 dark:border-gray-700/50"
           aria-label="Next game"
         >
           <svg 
@@ -129,7 +129,7 @@ export function GameNavigation() {
             height="24" 
             viewBox="0 0 24 24" 
             fill="none" 
-            className="text-gray-600 group-hover:text-czar-gold transition-colors"
+            className="text-gray-600 dark:text-gray-300 group-hover:text-czar-gold transition-colors"
           >
             <path 
               d="M9 18L15 12L9 6" 
@@ -139,7 +139,7 @@ export function GameNavigation() {
               strokeLinejoin="round"
             />
           </svg>
-          <span className="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+          <span className="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-black/80 dark:bg-gray-700/90 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
             {games[currentIndex + 1]?.name}
           </span>
         </button>
@@ -153,7 +153,7 @@ export function GameNavigation() {
             className={`w-2 h-2 rounded-full transition-all duration-300 ${
               index === currentIndex 
                 ? 'bg-czar-gold w-8' 
-                : 'bg-gray-300 hover:bg-gray-400'
+                : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
             }`}
             title={game.name}
           />

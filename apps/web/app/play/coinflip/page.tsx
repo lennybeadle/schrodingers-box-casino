@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { SuiWalletButton } from '@/components/SuiWalletButton';
 import { BettingPanel } from '@/components/BettingPanel';
 import { GameNavigation } from '@/components/GameNavigation';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 
@@ -356,17 +357,17 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
       <GameNavigation />
       {/* Sui Network Banner */}
       <div className={`border-b px-6 py-2 ${
         NETWORK === 'mainnet' 
-          ? 'bg-green-500/10 border-green-500/20' 
-          : 'bg-blue-500/10 border-blue-500/20'
+          ? 'bg-green-500/10 dark:bg-green-500/20 border-green-500/20 dark:border-green-500/30' 
+          : 'bg-blue-500/10 dark:bg-blue-500/20 border-blue-500/20 dark:border-blue-500/30'
       }`}>
         <div className="max-w-7xl mx-auto text-center">
           <p className={`text-sm font-medium ${
-            NETWORK === 'mainnet' ? 'text-green-600' : 'text-blue-600'
+            NETWORK === 'mainnet' ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'
           }`}>
             {NETWORK === 'mainnet' 
               ? '🚀 SUI MAINNET - Real SUI betting with ultra-low fees!'
@@ -386,13 +387,14 @@ export default function Home() {
                 alt="CatsinoFun Logo" 
                 className="w-8 h-8" 
               />
-              <span className="font-light text-xl tracking-wide text-gray-900">
+              <span className="font-light text-xl tracking-wide text-gray-900 dark:text-gray-100">
                 CatsinoFun
               </span>
             </Link>
           </div>
 
           <div className="flex items-center gap-6">
+            <ThemeToggle />
             <SuiWalletButton />
           </div>
         </div>
@@ -416,21 +418,21 @@ export default function Home() {
 
               <div className="space-y-12">
                 <div className="space-y-6">
-                  <h1 className="text-6xl font-thin text-gray-900 tracking-tight leading-tight">
+                  <h1 className="text-6xl font-thin text-gray-900 dark:text-gray-100 tracking-tight leading-tight">
                     CatFlip <span className="bg-gradient-to-r from-czar-gold via-caesar-gold to-czar-bronze bg-clip-text text-transparent">CoinFlip</span>
                   </h1>
                   
                   <div className="w-24 h-px bg-gradient-to-r from-transparent via-czar-gold to-transparent mx-auto"></div>
                   
-                  <p className="text-lg text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
+                  <p className="text-lg text-gray-600 dark:text-gray-300 font-light max-w-2xl mx-auto leading-relaxed">
                     Classic cat coin flip with elegant style. 
                     <br className="hidden sm:block" />
                     Each flip determines the cat's fate.
                   </p>
                 </div>
 
-                <div className="bg-gray-50 rounded-2xl p-8 max-w-md mx-auto">
-                  <h3 className="text-lg font-light text-gray-700 mb-4">Connect wallet to flip</h3>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 max-w-md mx-auto border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-light text-gray-700 dark:text-gray-300 mb-4">Connect wallet to flip</h3>
                   <SuiWalletButton />
                 </div>
               </div>
@@ -494,7 +496,7 @@ export default function Home() {
                   </div>
                   
                   <div className="space-y-4">
-                    <h2 className="text-4xl font-thin text-gray-900">
+                    <h2 className="text-4xl font-thin text-gray-900 dark:text-gray-100">
                       Emperor's Game
                     </h2>
                     <div className="w-16 h-px bg-gradient-to-r from-transparent via-czar-gold to-transparent mx-auto"></div>
@@ -503,7 +505,7 @@ export default function Home() {
 
                 {/* Center - Divider */}
                 <div className="hidden lg:block lg:col-span-1">
-                  <div className="w-px h-96 bg-gradient-to-b from-transparent via-gray-200 to-transparent mx-auto"></div>
+                  <div className="w-px h-96 bg-gradient-to-b from-transparent via-gray-200 dark:via-gray-700 to-transparent mx-auto"></div>
                 </div>
 
                 {/* Right - The Interface */}
@@ -519,8 +521,8 @@ export default function Home() {
                   />
 
                   {/* House Balance & Funding */}
-                  <div className="text-center py-4 border-t border-gray-100">
-                    <div className="text-sm text-gray-500 uppercase tracking-widest mb-2">
+                  <div className="text-center py-4 border-t border-gray-100 dark:border-gray-700">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">
                       House Balance
                     </div>
                     <div className={`text-xl font-mono mb-4 ${houseBalance > 0 ? 'text-green-600' : 'text-red-500'}`}>
@@ -529,10 +531,10 @@ export default function Home() {
                     {pathname.includes('makaveli') && (
                       <>
                         {houseBalance > 0 && (
-                          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
                             <div className="space-y-2">
-                              <div className="text-yellow-600 font-medium text-sm">⚠️ House has coins but they're not in the internal balance</div>
-                              <div className="text-yellow-600 text-xs">
+                              <div className="text-yellow-600 dark:text-yellow-400 font-medium text-sm">⚠️ House has coins but they're not in the internal balance</div>
+                              <div className="text-yellow-600 dark:text-yellow-400 text-xs">
                                 The smart contract can only use funds added through the fund_house function. 
                                 Direct transfers to the house address aren't accessible for betting.
                               </div>
@@ -541,22 +543,22 @@ export default function Home() {
                         )}
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
                             <div className="space-y-3">
-                              <div className="text-blue-600 font-medium text-sm">🏦 Add funds to house</div>
+                              <div className="text-blue-600 dark:text-blue-400 font-medium text-sm">🏦 Add funds to house</div>
                               <button
                                 onClick={handleFundHouse}
                                 disabled={isFunding}
-                                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors text-sm"
+                                className="w-full px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 disabled:opacity-50 transition-colors text-sm"
                               >
                                 {isFunding ? 'Funding...' : 'Fund House (1 SUI)'}
                               </button>
                             </div>
                           </div>
 
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4">
                             <div className="space-y-3">
-                              <div className="text-green-600 font-medium text-sm">💰 Withdraw profits</div>
+                              <div className="text-green-600 dark:text-green-400 font-medium text-sm">💰 Withdraw profits</div>
                               <div className="flex space-x-2">
                                 <input
                                   type="number"
@@ -564,13 +566,13 @@ export default function Home() {
                                   onChange={(e) => setWithdrawAmount(e.target.value)}
                                   step="0.01"
                                   min="0.01"
-                                  className="flex-1 px-2 py-1 border border-green-300 rounded text-sm"
+                                  className="flex-1 px-2 py-1 border border-green-300 dark:border-green-600 dark:bg-gray-800 dark:text-gray-100 rounded text-sm"
                                   placeholder="0.1"
                                 />
                                 <button
                                   onClick={initiateWithdrawal}
                                   disabled={isWithdrawing || parseFloat(withdrawAmount) <= 0}
-                                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors text-sm"
+                                  className="px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-800 disabled:opacity-50 transition-colors text-sm"
                                 >
                                   {isWithdrawing ? 'Withdrawing...' : 'Withdraw'}
                                 </button>
@@ -587,7 +589,7 @@ export default function Home() {
                     <button 
                       onClick={handleQuickFlip}
                       disabled={isPlaying || !currentAccount}
-                      className="group relative w-full py-8 bg-gradient-to-r from-gray-900 via-black to-gray-900 text-white overflow-hidden transition-all duration-700 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
+                      className="group relative w-full py-8 bg-gradient-to-r from-gray-900 via-black to-gray-900 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 text-white overflow-hidden transition-all duration-700 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
                       style={{ borderRadius: '2px' }}
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-czar-gold via-caesar-gold to-czar-bronze opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
@@ -613,11 +615,11 @@ export default function Home() {
                         </div>
                         <div className="space-y-2">
                           <div className={`text-2xl font-light ${
-                            lastResult.success && lastResult.message.includes('won') ? 'text-green-600' : 'text-red-600'
+                            lastResult.success && lastResult.message.includes('won') ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                           }`}>
                             {lastResult.success && lastResult.message.includes('won') ? 'EMPEROR LIVES' : 'EMPEROR FALLS'}
                           </div>
-                          <div className="text-sm font-mono text-gray-600">
+                          <div className="text-sm font-mono text-gray-600 dark:text-gray-300">
                             {lastResult.message}
                           </div>
                           {lastResult.txUrl && (
@@ -645,14 +647,14 @@ export default function Home() {
 
         {/* Passcode Modal */}
         {showPasscodeModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-              <h3 className="text-lg font-semibold mb-4">Enter Admin Passcode</h3>
+          <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Enter Admin Passcode</h3>
               <input
                 type="password"
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-4"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg mb-4"
                 placeholder="Enter passcode"
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
@@ -664,14 +666,14 @@ export default function Home() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowPasscodeModal(false)}
-                  className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                  className="flex-1 px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleWithdrawProfits}
                   disabled={!passcode}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+                  className="flex-1 px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-800 disabled:opacity-50 transition-colors"
                 >
                   Confirm
                 </button>
@@ -683,9 +685,9 @@ export default function Home() {
         {/* Footer - Minimalist Tribute */}
         <footer className="absolute bottom-0 left-0 right-0 px-6 py-8">
           <div className="max-w-7xl mx-auto text-center space-y-6">
-            <div className="w-16 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
+            <div className="w-16 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent mx-auto"></div>
             
-            <p className="text-xs text-gray-400 font-mono tracking-wider">
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-mono tracking-wider">
               In Memoriam Caesar • $CZAR
             </p>
             
@@ -694,7 +696,7 @@ export default function Home() {
                 href="https://www.youtube.com/@catsinofun" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-czar-gold transition-colors duration-300"
+                className="text-gray-400 dark:text-gray-500 hover:text-czar-gold transition-colors duration-300"
                 title="YouTube"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -705,7 +707,7 @@ export default function Home() {
                 href="https://www.tiktok.com/@catsinofun" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-czar-gold transition-colors duration-300"
+                className="text-gray-400 dark:text-gray-500 hover:text-czar-gold transition-colors duration-300"
                 title="TikTok"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -716,7 +718,7 @@ export default function Home() {
                 href="https://x.com/catsinofun" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-czar-gold transition-colors duration-300"
+                className="text-gray-400 dark:text-gray-500 hover:text-czar-gold transition-colors duration-300"
                 title="X (Twitter)"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -727,14 +729,14 @@ export default function Home() {
                 href="https://discord.gg/zaxbFxVBHE" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-czar-gold transition-colors duration-300"
+                className="text-gray-400 dark:text-gray-500 hover:text-czar-gold transition-colors duration-300"
                 title="Discord"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0190 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9460 2.4189-2.1568 2.4189Z"/>
                 </svg>
               </a>
-              <div className="w-px h-3 bg-gray-200"></div>
+              <div className="w-px h-3 bg-gray-200 dark:bg-gray-700"></div>
               <Link 
                 href="/play" 
                 className="text-gray-400 hover:text-czar-gold transition-colors duration-300 font-mono tracking-wide"

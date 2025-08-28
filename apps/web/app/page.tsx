@@ -3,23 +3,24 @@
 import Link from 'next/link';
 import { SuiWalletButton } from '@/components/SuiWalletButton';
 import { GameNavigation } from '@/components/GameNavigation';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function Home() {
   const NETWORK = process.env.NEXT_PUBLIC_SUI_NETWORK || 'testnet';
 
   return (
-    <div className="min-h-screen bg-white relative">
+    <div className="min-h-screen bg-white dark:bg-gray-900 relative transition-colors duration-300">
       <GameNavigation />
       
       {/* Network Status Banner */}
       <div className={`px-6 py-3 ${
         NETWORK === 'mainnet' 
-          ? 'bg-green-500/10 border-green-500/20' 
-          : 'bg-blue-500/10 border-blue-500/20'
+          ? 'bg-green-500/10 dark:bg-green-500/20 border-green-500/20 dark:border-green-500/30' 
+          : 'bg-blue-500/10 dark:bg-blue-500/20 border-blue-500/20 dark:border-blue-500/30'
       }`}>
         <div className="max-w-7xl mx-auto text-center">
           <p className={`text-sm font-medium ${
-            NETWORK === 'mainnet' ? 'text-green-600' : 'text-blue-600'
+            NETWORK === 'mainnet' ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'
           }`}>
             {NETWORK === 'mainnet' 
               ? '🚀 SUI MAINNET - Real SUI betting with ultra-low fees!'
@@ -39,13 +40,14 @@ export default function Home() {
                 alt="CatsinoFun Logo" 
                 className="w-8 h-8" 
               />
-              <span className="font-light text-xl tracking-wide text-gray-900">
+              <span className="font-light text-xl tracking-wide text-gray-900 dark:text-gray-100">
                 CatsinoFun
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-6">
+            <ThemeToggle />
             <SuiWalletButton />
           </div>
         </div>
@@ -58,25 +60,25 @@ export default function Home() {
 
             <div className="space-y-12">
               <div className="space-y-6">
-                <h1 className="text-6xl font-thin text-gray-900 tracking-tight leading-tight">
+                <h1 className="text-6xl font-thin text-gray-900 dark:text-gray-100 tracking-tight leading-tight">
                   CatsinoFun
                 </h1>
                 
-                <div className="w-24 h-px bg-gradient-to-r from-transparent via-gray-400 to-transparent mx-auto"></div>
+                <div className="w-24 h-px bg-gradient-to-r from-transparent via-gray-400 dark:via-gray-500 to-transparent mx-auto"></div>
                 
-                <p className="text-lg text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
+                <p className="text-lg text-gray-600 dark:text-gray-300 font-light max-w-2xl mx-auto leading-relaxed">
                   Welcome to Caesar's Games on SUI blockchain.
                   <br className="hidden sm:block" />
                   Choose your game and start playing.
                 </p>
 
                 {/* Contract Address */}
-                <div className="bg-gray-50 rounded-2xl p-6 max-w-lg mx-auto">
-                  <div className="text-sm text-gray-500 uppercase tracking-widest mb-3">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 max-w-lg mx-auto border border-gray-200 dark:border-gray-700">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">
                     $CZAR Contract Address
                   </div>
                   <div className="text-center">
-                    <span className="text-gray-400 font-mono text-sm italic">
+                    <span className="text-gray-400 dark:text-gray-500 font-mono text-sm italic">
                       Coming Soon
                     </span>
                   </div>
@@ -86,7 +88,7 @@ export default function Home() {
               <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                 <Link 
                   href="/play/coinflip"
-                  className="group bg-white/80 backdrop-blur rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105"
+                  className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105"
                 >
                   <div className="text-center space-y-3">
                     <img 
@@ -94,15 +96,15 @@ export default function Home() {
                       alt="CatFlip" 
                       className="w-20 h-20 mx-auto rounded-full"
                     />
-                    <h3 className="text-lg font-light text-gray-900">CatFlip CoinFlip</h3>
-                    <p className="text-sm text-gray-600">Classic coin flip • 1.96x payout</p>
-                    <div className="text-xs text-gray-400">Click to play →</div>
+                    <h3 className="text-lg font-light text-gray-900 dark:text-gray-100">CatFlip CoinFlip</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Classic coin flip • 1.96x payout</p>
+                    <div className="text-xs text-gray-400 dark:text-gray-500">Click to play →</div>
                   </div>
                 </Link>
 
                 <Link 
                   href="/play/crash"
-                  className="group bg-white/80 backdrop-blur rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105"
+                  className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105"
                 >
                   <div className="text-center space-y-3">
                     <img 
@@ -110,15 +112,15 @@ export default function Home() {
                       alt="Cat Crash" 
                       className="w-20 h-20 mx-auto rounded-full"
                     />
-                    <h3 className="text-lg font-light text-gray-900">Cat Crash</h3>
-                    <p className="text-sm text-gray-600">Crash game • Up to 5x multiplier</p>
-                    <div className="text-xs text-gray-400">Click to play →</div>
+                    <h3 className="text-lg font-light text-gray-900 dark:text-gray-100">Cat Crash</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Crash game • Up to 5x multiplier</p>
+                    <div className="text-xs text-gray-400 dark:text-gray-500">Click to play →</div>
                   </div>
                 </Link>
 
                 <Link 
                   href="/play/revolver"
-                  className="group bg-white/80 backdrop-blur rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105"
+                  className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105"
                 >
                   <div className="text-center space-y-3">
                     <img 
@@ -126,9 +128,9 @@ export default function Home() {
                       alt="Revolver Roulette" 
                       className="w-20 h-20 mx-auto rounded-full"
                     />
-                    <h3 className="text-lg font-light text-gray-900">Revolver Roulette</h3>
-                    <p className="text-sm text-gray-600">Russian roulette • 7.76x payout</p>
-                    <div className="text-xs text-gray-400">Click to play →</div>
+                    <h3 className="text-lg font-light text-gray-900 dark:text-gray-100">Revolver Roulette</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Russian roulette • 7.76x payout</p>
+                    <div className="text-xs text-gray-400 dark:text-gray-500">Click to play →</div>
                   </div>
                 </Link>
               </div>
@@ -139,9 +141,9 @@ export default function Home() {
         {/* Footer */}
         <footer className="absolute bottom-0 left-0 right-0 px-6 py-8">
           <div className="max-w-7xl mx-auto text-center space-y-6">
-            <div className="w-16 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
+            <div className="w-16 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent mx-auto"></div>
             
-            <p className="text-xs text-gray-400 font-mono tracking-wider">
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-mono tracking-wider">
               CatsinoFun • Premium Sui Casino • Ultra-low fees
             </p>
             
@@ -150,7 +152,7 @@ export default function Home() {
                 href="https://www.youtube.com/@catsinofun" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-600 transition-colors duration-300"
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-300"
                 title="YouTube"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -161,7 +163,7 @@ export default function Home() {
                 href="https://www.tiktok.com/@catsinofun" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-600 transition-colors duration-300"
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-300"
                 title="TikTok"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -172,7 +174,7 @@ export default function Home() {
                 href="https://x.com/catsinofun" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-600 transition-colors duration-300"
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-300"
                 title="X (Twitter)"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -183,7 +185,7 @@ export default function Home() {
                 href="https://discord.gg/zaxbFxVBHE" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-600 transition-colors duration-300"
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-300"
                 title="Discord"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

@@ -75,6 +75,13 @@ body.slide-right main {
   width: 90vw;
   max-height: 80vh;
   overflow-y: auto;
+  border: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+.dark .sui-wallet-modal {
+  background: rgb(31, 41, 55);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(75, 85, 99, 0.5);
 }
 
 .sui-wallet-overlay {
@@ -85,6 +92,10 @@ body.slide-right main {
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 40;
+}
+
+.dark .sui-wallet-overlay {
+  background: rgba(0, 0, 0, 0.7);
 }
 
 /* Custom slider styles */

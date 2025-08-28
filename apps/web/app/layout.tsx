@@ -1,5 +1,6 @@
 import './globals.css';
 import { SuiWalletProvider } from './providers/SuiWalletProvider';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 export const metadata = {
   title: "CatsinoFun - Purr-fect Casino Games on Sui",
@@ -22,10 +23,12 @@ export default function RootLayout({
           rel="stylesheet" 
         />
       </head>
-      <body className="bg-white min-h-screen font-space text-caesar-black antialiased">
-        <SuiWalletProvider>
-          {children}
-        </SuiWalletProvider>
+      <body className="bg-white dark:bg-gray-900 min-h-screen font-space text-caesar-black dark:text-gray-100 antialiased transition-colors duration-300">
+        <ThemeProvider>
+          <SuiWalletProvider>
+            {children}
+          </SuiWalletProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

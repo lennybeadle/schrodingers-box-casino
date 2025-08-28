@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { SuiWalletButton } from '@/components/SuiWalletButton';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { useState, useEffect } from 'react';
 import { suiClient } from '@/lib/suiClient';
@@ -118,7 +119,7 @@ export default function Play() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
       {/* Ultra-Minimal Navigation */}
       <nav className="relative z-50 px-6 py-8">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
@@ -128,12 +129,13 @@ export default function Play() {
           >
             <img src="/logo.svg" alt="Caesar" className="w-6 h-6 animate-caesar-float opacity-80" />
             <div>
-              <h1 className="text-lg font-thin text-gray-900 tracking-wide">CATSINO</h1>
-              <p className="text-xs text-gray-400 font-mono tracking-wider">Advanced Interface</p>
+              <h1 className="text-lg font-thin text-gray-900 dark:text-gray-100 tracking-wide">CATSINO</h1>
+              <p className="text-xs text-gray-400 dark:text-gray-500 font-mono tracking-wider">Advanced Interface</p>
             </div>
           </Link>
           
           <div className="flex items-center gap-6">
+            <ThemeToggle />
             <SuiWalletButton />
           </div>
         </div>
@@ -145,13 +147,13 @@ export default function Play() {
           <div className="space-y-8">
             {/* Compact Header */}
             <div className="text-center space-y-4 py-6">
-              <div className="w-8 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
+              <div className="w-8 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent mx-auto"></div>
               
               <div className="space-y-2">
-                <h1 className="text-3xl font-thin text-gray-900 tracking-wide">
+                <h1 className="text-3xl font-thin text-gray-900 dark:text-gray-100 tracking-wide">
                   Emperor's Arena
                 </h1>
-                <p className="text-gray-500 font-light text-sm max-w-md mx-auto">
+                <p className="text-gray-500 dark:text-gray-400 font-light text-sm max-w-md mx-auto">
                   Quantum chance meets imperial legacy
                 </p>
               </div>
@@ -159,7 +161,7 @@ export default function Play() {
 
             {/* Tab Navigation */}
             <div className="flex justify-center mb-8">
-              <div className="flex bg-gray-100 rounded-lg p-1">
+              <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700">
                 {[
                   { id: 'overview', label: 'Overview' },
                   { id: 'my-bets', label: 'My Bets' },
@@ -170,8 +172,8 @@ export default function Play() {
                     onClick={() => setActiveTab(tab.id as any)}
                     className={`px-6 py-2 rounded-md font-medium text-sm transition-all ${
                       activeTab === tab.id
-                        ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                     }`}
                   >
                     {tab.label}
@@ -183,7 +185,7 @@ export default function Play() {
             {loading ? (
               <div className="text-center py-20">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-czar-gold"></div>
-                <p className="mt-4 text-gray-500">Loading casino data...</p>
+                <p className="mt-4 text-gray-500 dark:text-gray-400">Loading casino data...</p>
               </div>
             ) : (
               <>
@@ -192,58 +194,58 @@ export default function Play() {
                   <div className="space-y-8">
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                      <div className="bg-gray-50 rounded-lg p-6 text-center">
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 text-center border border-gray-100 dark:border-gray-700">
                         <div className="text-lg font-bold text-czar-gold mb-1">
                           3.96% | 3.0% | 3.0%
                         </div>
-                        <div className="text-sm text-gray-600">House Edge</div>
-                        <div className="text-xs text-gray-500 mt-1">CoinFlip | Crash | Revolver</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">House Edge</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">CoinFlip | Crash | Revolver</div>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-6 text-center">
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 text-center border border-gray-100 dark:border-gray-700">
                         <div className="text-2xl font-bold text-czar-gold mb-1">
                           {stats.totalVolume24h.toFixed(3)}
                         </div>
-                        <div className="text-sm text-gray-600">Volume 24h (SUI)</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Volume 24h (SUI)</div>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-6 text-center">
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 text-center border border-gray-100 dark:border-gray-700">
                         <div className="text-2xl font-bold text-czar-gold mb-1">
                           {stats.actualWinRate.toFixed(1)}%
                         </div>
-                        <div className="text-sm text-gray-600">Actual Win Rate</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Actual Win Rate</div>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-6 text-center">
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 text-center border border-gray-100 dark:border-gray-700">
                         <div className="text-2xl font-bold text-czar-gold mb-1">
                           {stats.largestWin.toFixed(3)}
                         </div>
-                        <div className="text-sm text-gray-600">Largest Win (SUI)</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Largest Win (SUI)</div>
                       </div>
                     </div>
 
 
                     {/* Recent Activity */}
-                    <div className="bg-white border border-gray-200 rounded-lg">
-                      <div className="px-6 py-4 border-b border-gray-200">
-                        <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+                      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Recent Activity</h3>
                       </div>
                       <div className="max-h-96 overflow-y-auto">
                         {stats.recentBets.length === 0 ? (
-                          <div className="px-6 py-12 text-center text-gray-500">
+                          <div className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                             No bets found. Start playing to see activity!
                           </div>
                         ) : (
-                          <div className="divide-y divide-gray-100">
+                          <div className="divide-y divide-gray-100 dark:divide-gray-700">
                             {stats.recentBets.map((bet, index) => (
                               <div key={index} className="px-6 py-4 flex items-center justify-between">
                                 <div className="flex items-center space-x-4">
                                   <div className={`w-3 h-3 rounded-full ${bet.isWinner ? 'bg-green-500' : 'bg-red-500'}`}></div>
                                   <div>
-                                    <div className="font-mono text-sm">{formatAddress(bet.player)}</div>
-                                    <div className="text-xs text-gray-500">{formatTime(bet.timestamp)}</div>
+                                    <div className="font-mono text-sm text-gray-900 dark:text-gray-100">{formatAddress(bet.player)}</div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400">{formatTime(bet.timestamp)}</div>
                                   </div>
                                 </div>
                                 <div className="text-right">
-                                  <div className="font-semibold">{bet.amount.toFixed(3)} SUI</div>
-                                  <div className={`text-sm ${bet.isWinner ? 'text-green-600' : 'text-red-600'}`}>
+                                  <div className="font-semibold text-gray-900 dark:text-gray-100">{bet.amount.toFixed(3)} SUI</div>
+                                  <div className={`text-sm ${bet.isWinner ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                                     {bet.isWinner ? `Won ${bet.payout.toFixed(3)}` : 'Lost'}
                                   </div>
                                 </div>
@@ -258,13 +260,13 @@ export default function Play() {
 
                 {/* My Bets Tab */}
                 {activeTab === 'my-bets' && (
-                  <div className="bg-white border border-gray-200 rounded-lg">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900">My Betting History</h3>
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">My Betting History</h3>
                     </div>
                     <div className="max-h-96 overflow-y-auto">
                       {playerBets.length === 0 ? (
-                        <div className="px-6 py-12 text-center text-gray-500">
+                        <div className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                           No bets found. <Link href="/" className="text-czar-gold hover:underline">Start playing!</Link>
                         </div>
                       ) : (
