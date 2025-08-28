@@ -111,7 +111,7 @@ export default function Home() {
                       className="w-20 h-20 mx-auto rounded-full"
                     />
                     <h3 className="text-lg font-light text-gray-900">Cat Crash</h3>
-                    <p className="text-sm text-gray-600">Crash game • Up to 30x multiplier</p>
+                    <p className="text-sm text-gray-600">Crash game • Up to 5x multiplier</p>
                     <div className="text-xs text-gray-400">Click to play →</div>
                   </div>
                 </Link>

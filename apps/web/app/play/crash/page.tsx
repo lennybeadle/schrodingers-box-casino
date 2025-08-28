@@ -152,6 +152,10 @@ export default function CrashPage() {
       const amountMist = Math.floor(fundAmount * 1_000_000_000);
 
       const tx = new Transaction();
+      
+      // Set explicit gas budget to help wallet estimate fees
+      tx.setGasBudget(10_000_000); // 0.01 SUI
+      
       const [coin] = tx.splitCoins(tx.gas, [amountMist]);
       
       tx.moveCall({
@@ -223,6 +227,9 @@ export default function CrashPage() {
 
       const tx = new Transaction();
       
+      // Set explicit gas budget to help wallet estimate fees
+      tx.setGasBudget(10_000_000); // 0.01 SUI
+      
       tx.moveCall({
         target: `${PACKAGE_ID}::casino::withdraw_profits`,
         arguments: [
@@ -287,6 +294,10 @@ export default function CrashPage() {
       const stakeInMist = Math.floor(stake * 1_000_000_000);
 
       const tx = new Transaction();
+      
+      // Set explicit gas budget to help wallet estimate fees
+      tx.setGasBudget(10_000_000); // 0.01 SUI, plenty for this transaction
+      
       const [coin] = tx.splitCoins(tx.gas, [stakeInMist]);
 
       tx.moveCall({
