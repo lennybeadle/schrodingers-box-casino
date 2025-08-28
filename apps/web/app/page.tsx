@@ -191,29 +191,40 @@ export default function Home() {
       // Parse events to get bet result
       let isWinner = false;
       let payout = 0;
+      let randomValue = 0;
       let message = 'Bet placed successfully!';
 
-      if (result.events) {
-        for (const event of result.events) {
-          if (event.type.includes('BetPlaced')) {
+      console.log('Raw transaction result:', result);
+
+      // Check both result.events and result.objectChanges for events
+      const events = result.events || [];
+      if (events.length > 0) {
+        console.log('Found events:', events);
+        for (const event of events) {
+          console.log('Event type:', event.type);
+          console.log('Event data:', event.parsedJson);
+          
+          if (event.type && event.type.includes('BetPlaced')) {
             const eventData = event.parsedJson as any;
             isWinner = eventData.is_winner;
             payout = parseInt(eventData.payout) / 1_000_000_000; // Convert MIST to SUI
-            const randomValue = eventData.random_value;
+            randomValue = parseInt(eventData.random_value);
             
-            console.log('Bet result:', {
+            console.log('✅ BetPlaced event found!', {
               isWinner,
               payout: eventData.payout,
               randomValue,
-              winThreshold: 47
+              winThreshold: 49 // Old contract threshold
             });
             
             message = isWinner 
               ? `🎉 Caesar Lives! You won ${payout.toFixed(3)} SUI! (Random: ${randomValue})` 
-              : `⚱️ Caesar Falls! You lost. (Random: ${randomValue}, needed ≤ 47)`;
+              : `⚱️ Caesar Falls! You lost. (Random: ${randomValue}, needed ≤ 49)`;
             break;
           }
         }
+      } else {
+        console.log('❌ No events found in transaction result');
       }
 
       const explorerUrl = NETWORK === 'mainnet' 
