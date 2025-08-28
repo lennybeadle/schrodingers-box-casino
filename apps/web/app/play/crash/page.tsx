@@ -294,10 +294,6 @@ export default function CrashPage() {
       const stakeInMist = Math.floor(stake * 1_000_000_000);
 
       const tx = new Transaction();
-      
-      // Set explicit gas budget to help wallet estimate fees
-      tx.setGasBudget(10_000_000); // 0.01 SUI, plenty for this transaction
-      
       const [coin] = tx.splitCoins(tx.gas, [stakeInMist]);
 
       tx.moveCall({
