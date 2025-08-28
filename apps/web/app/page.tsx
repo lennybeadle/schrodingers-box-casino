@@ -328,7 +328,7 @@ export default function Home() {
       <main className="relative">
         {!currentAccount ? (
           /* Welcome State */
-          <div className="min-h-screen flex items-center justify-center px-6">
+          <div className="min-h-screen flex items-center justify-center px-6 pb-32">
             <div className="max-w-4xl mx-auto text-center space-y-16">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-caesar-gold/10 via-caesar-cream/5 to-czar-bronze/10 rounded-full blur-3xl animate-pulse"></div>
@@ -370,7 +370,7 @@ export default function Home() {
           </div>
         ) : (
           /* Game State */
-          <div className="min-h-screen flex items-center justify-center px-6">
+          <div className="min-h-screen flex items-center justify-center px-6 pb-32">
             <div className="max-w-6xl mx-auto">
               <div className="grid lg:grid-cols-5 gap-16 items-center">
                 
@@ -399,7 +399,7 @@ export default function Home() {
                         </div>
                         
                         {/* Tails Side */}
-                        <div className="absolute inset-0 w-full h-full backface-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                        <div className="absolute inset-0 w-full h-full backface-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateX(180deg)' }}>
                           <img 
                             src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/tails.webp" 
                             alt="Coin Tails" 
