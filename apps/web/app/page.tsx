@@ -205,12 +205,12 @@ export default function Home() {
               isWinner,
               payout: eventData.payout,
               randomValue,
-              winThreshold: 49
+              winThreshold: 47
             });
             
             message = isWinner 
               ? `🎉 Caesar Lives! You won ${payout.toFixed(3)} SUI! (Random: ${randomValue})` 
-              : `⚱️ Caesar Falls! You lost. (Random: ${randomValue}, needed ≤ 49)`;
+              : `⚱️ Caesar Falls! You lost. (Random: ${randomValue}, needed ≤ 47)`;
             break;
           }
         }
@@ -304,7 +304,7 @@ export default function Home() {
                   <h1 className="text-6xl font-thin text-gray-900 tracking-tight leading-tight">
                     Imperial Gaming<br/>
                     <span className="bg-gradient-to-r from-czar-gold via-caesar-gold to-czar-bronze bg-clip-text text-transparent">
-                      Perfection
+                      Perfection V2
                     </span>
                   </h1>
                   
@@ -399,7 +399,7 @@ export default function Home() {
                       Potential Win
                     </div>
                     <div className="text-3xl font-light text-czar-gold font-mono">
-                      {(parseFloat(betAmount || '0') * 1.96).toFixed(3)} SUI
+                      {(parseFloat(betAmount || '0') * 2.0).toFixed(3)} SUI
                     </div>
                   </div>
 
