@@ -63,7 +63,7 @@ module catsino::casino {
     }
 
     // Initialize the house (only called once)
-    fun init(otw: OTW, ctx: &mut TxContext) {
+    fun init(otw: CASINO, ctx: &mut TxContext) {
         let owner = tx_context::sender(ctx);
         
         // Create upgrade cap for future upgrades
@@ -92,7 +92,7 @@ module catsino::casino {
     }
 
     // One-Time-Witness for upgrade capability
-    public struct OTW has drop {}
+    public struct CASINO has drop {}
 
     // Fund the house (anyone can fund)
     public entry fun fund_house(

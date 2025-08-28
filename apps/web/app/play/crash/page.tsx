@@ -11,6 +11,7 @@ import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@
 import { Transaction } from '@mysten/sui/transactions';
 
 export default function CrashPage() {
+  
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const suiClient = useSuiClient();
@@ -59,31 +60,52 @@ export default function CrashPage() {
     { label: '5.00×', value: 500 },
   ];
 
-  // Multiplier counting effect during animation
+  // Multiplier counting effect during animation with exponential crash curve
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
+    let animationFrameId: number | null = null;
     let startTime: number | null = null;
+    let targetCrash: number | null = null;
     
     if (isAnimating) {
       setCurrentMultiplier(100); // Start at 1.00x
       startTime = Date.now();
       
-      intervalId = setInterval(() => {
-        setCurrentMultiplier(prev => {
-          const elapsed = Date.now() - (startTime || 0);
-          
-          // Create a realistic crash curve - multiplier increases faster early on, then slows
-          const timeInSeconds = elapsed / 1000;
-          const baseMultiplier = 100 + (timeInSeconds * 30) + (Math.pow(timeInSeconds, 1.5) * 10);
-          
-          // Add some randomness for realism
-          const randomVariation = (Math.random() - 0.5) * 5;
-          const newMultiplier = baseMultiplier + randomVariation;
-          
-          // Cap at a reasonable maximum for display purposes
-          return Math.min(newMultiplier, 1000);
-        });
-      }, 50); // Update every 50ms for smooth counting
+      // If we have a known crash value from the result, use it as target
+      if (lastResult && lastResult.crashMultiplier) {
+        targetCrash = lastResult.crashMultiplier;
+      }
+      
+      const animate = () => {
+        const elapsed = Date.now() - (startTime || 0);
+        const timeInSeconds = elapsed / 1000;
+        
+        // Use the standard crash game exponential formula: multiplier = e^(0.05 * t)
+        // This gives a realistic exponential growth that starts slow and accelerates
+        // Adjusted with factor 0.15 for better pacing
+        let newMultiplier = Math.floor(100 * Math.exp(0.15 * timeInSeconds));
+        
+        // If we know the target crash, slow down as we approach it
+        if (targetCrash && newMultiplier > targetCrash - 20) {
+          // Slow down near the target
+          const remaining = targetCrash - newMultiplier;
+          newMultiplier = targetCrash - Math.max(0, remaining * 0.95);
+        }
+        
+        // Stop at target or max
+        if (targetCrash && newMultiplier >= targetCrash) {
+          newMultiplier = targetCrash;
+          setCurrentMultiplier(newMultiplier);
+          return; // Stop animation
+        }
+        
+        setCurrentMultiplier(Math.min(newMultiplier, 10000)); // Cap at 100x
+        
+        // Continue animation
+        animationFrameId = requestAnimationFrame(animate);
+      };
+      
+      animationFrameId = requestAnimationFrame(animate);
     } else {
       setCurrentMultiplier(100); // Reset when not animating
     }
@@ -92,8 +114,11 @@ export default function CrashPage() {
       if (intervalId) {
         clearInterval(intervalId);
       }
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
     };
-  }, [isAnimating]);
+  }, [isAnimating, lastResult]);
 
   // Calculate potential payout with 3% house edge (97% payout)
   const calculatePayout = (stake: number, target: number) => {
@@ -118,19 +143,50 @@ export default function CrashPage() {
         limit: 10
       });
       
-      // Look for recent crash game transactions (within last 30 seconds)
+      // Look for recent crash game transactions (within last 120 seconds)
       const now = Date.now();
-      const recentCutoff = now - 30000; // 30 seconds ago
+      const recentCutoff = now - 120000; // 120 seconds ago
+      
+      console.log(`Found ${txns.data.length} recent transactions, checking for crash games...`);
       
       for (const tx of txns.data) {
         const txTime = parseInt(tx.timestampMs || '0');
-        if (txTime < recentCutoff) continue; // Too old
+        const ageSeconds = Math.round((now - txTime) / 1000);
+        console.log(`Transaction ${tx.digest}: ${ageSeconds}s ago (${txTime})`);
+        if (txTime < recentCutoff) {
+          console.log(`Transaction too old (${ageSeconds}s), skipping`);
+          continue; // Too old
+        }
         
-        // Check if this transaction has crash game events
+        // Check if this transaction targets the crash module or has crash game events
+        const isRecentTransaction = txTime >= recentCutoff;
+        let isCrashTransaction = false;
+        
+        // Check transaction input for crash module calls
+        if (tx.transaction?.data?.transaction && 'kind' in tx.transaction.data.transaction) {
+          const txData = tx.transaction.data.transaction;
+          // Check if it's a programmable transaction
+          if (txData.kind === 'ProgrammableTransaction' && txData.inputs && txData.transactions) {
+            for (const t of txData.transactions) {
+              if ('MoveCall' in t && t.MoveCall) {
+                const moveCall = t.MoveCall;
+                if (moveCall.function === 'play' && moveCall.module === 'crash') {
+                  console.log('Found crash module call in transaction:', tx.digest);
+                  isCrashTransaction = true;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        
+        // Check for crash game events
         if (tx.events && tx.events.length > 0) {
+          console.log(`Transaction has ${tx.events.length} events:`, tx.events.map(e => e.type));
           for (const event of tx.events) {
             if (event.type && event.type.includes('crash::CrashEvent')) {
-              console.log('Found recent crash game transaction:', tx.digest);
+              console.log('Found crash game event in transaction:', tx.digest);
+              isCrashTransaction = true;
               
               const eventData = event.parsedJson as any;
               const crashMultiplier = parseInt(eventData.crash_x100);
@@ -175,12 +231,23 @@ export default function CrashPage() {
             }
           }
         }
+        
+        // If we found a crash transaction but couldn't parse events, at least notify the user
+        if (isCrashTransaction) {
+          const explorerUrl = `https://suiexplorer.com/txblock/${tx.digest}?network=${NETWORK}`;
+          setLastResult({
+            success: true,
+            message: "🔍 Found your crash game transaction! Check the transaction details for results.",
+            txUrl: explorerUrl
+          });
+          return;
+        }
       }
       
       // No recent crash transaction found
       setLastResult({
         success: false,
-        message: "⚠️ No recent crash game found in blockchain. Check your wallet history or try again."
+        message: "⚠️ No recent crash game found in blockchain. The transaction may still be processing, or check your wallet history."
       });
       
     } catch (error) {
@@ -382,165 +449,195 @@ export default function CrashPage() {
     try {
       const stakeInMist = Math.floor(stake * 1_000_000_000);
 
-      const tx = new Transaction();
-      const [coin] = tx.splitCoins(tx.gas, [stakeInMist]);
+      // Create transaction - exact same as coinflip
+      console.log('Creating crash transaction...');
+      const txb = new Transaction();
+      
+      // Set explicit gas budget to help wallet estimate fees
+      txb.setGasBudget(10_000_000); // 0.01 SUI
+      
+      const [coin] = txb.splitCoins(txb.gas, [stakeInMist]);
+      
+      console.log('Package ID:', PACKAGE_ID);
+      console.log('House Object ID:', HOUSE_OBJECT_ID);
+      console.log('Bet Amount (MIST):', stakeInMist);
+      console.log('Target Multiplier:', targetMultiplier);
 
-      tx.moveCall({
+      txb.moveCall({
         target: `${PACKAGE_ID}::crash::play`,
         arguments: [
-          tx.object('0x8'), // Random object
-          tx.object(HOUSE_OBJECT_ID),
-          tx.pure.u64(targetMultiplier),
+          txb.object('0x8'),
+          txb.object(HOUSE_OBJECT_ID),
+          txb.pure.u64(targetMultiplier),
           coin,
         ],
       });
 
-      signAndExecuteTransaction(
-        {
-          transaction: tx,
-        },
-        {
-          onSuccess: async (result) => {
-            console.log('Crash game transaction successful:', result);
-            
-            // Start the animation now that transaction is confirmed
-            setIsAnimating(true);
-            
-            // Parse the crash event from transaction events
-            let crashMultiplier = 150;
-            let isWinner = false;
-            let payout = 0;
+      console.log('Executing crash transaction...');
 
-            // Fetch transaction details to get events
-            try {
-              const txResult = await suiClient.getTransactionBlock({
-                digest: result.digest,
-                options: { showEvents: true }
-              });
-
-              if (txResult.events && txResult.events.length > 0) {
-                const crashEvent = txResult.events.find(event => 
-                  event.type && event.type.includes('crash::CrashEvent')
-                );
-
-                if (crashEvent && crashEvent.parsedJson) {
-                  const eventData = crashEvent.parsedJson as any;
-                  crashMultiplier = parseInt(eventData.crash_x100);
-                  isWinner = eventData.win;
-                  payout = parseInt(eventData.payout) / 1_000_000_000;
+      const result = await new Promise<any>((resolve, reject) => {
+        signAndExecuteTransaction(
+          { 
+            transaction: txb,
+            options: {
+              showEvents: true,
+              showEffects: true,
+              showInput: true,
+            }
+          },
+          {
+            onSuccess: async (data) => {
+              console.log('Crash transaction successful:', data);
+              
+              // Wait a bit for the transaction to be indexed, then fetch full details
+              let fullTx = null;
+              let retries = 0;
+              const maxRetries = 5;
+              
+              while (!fullTx && retries < maxRetries) {
+                try {
+                  await new Promise(r => setTimeout(r, 1000)); // Wait 1 second
+                  fullTx = await suiClient.getTransactionBlock({
+                    digest: data.digest,
+                    options: {
+                      showEvents: true,
+                      showEffects: true,
+                      showInput: true,
+                    }
+                  });
+                  console.log('Full transaction details:', fullTx);
+                } catch (err) {
+                  console.log(`Retry ${retries + 1}/${maxRetries} - Transaction not indexed yet`);
+                  retries++;
                 }
               }
-            } catch (eventError) {
-              console.warn('Could not fetch events:', eventError);
-            }
+              
+              if (fullTx && fullTx.events) {
+                resolve({ ...data, events: fullTx.events });
+              } else {
+                console.error('Could not fetch transaction events after retries');
+                resolve(data);
+              }
+            },
+            onError: (error) => {
+              console.error('Crash transaction error in signAndExecuteTransaction:', error);
+              reject(error);
+            },
+          }
+        );
+      });
 
-            const explorerUrl = `https://suiexplorer.com/txblock/${result.digest}?network=${NETWORK}`;
-
-            // Add to game history
-            setGameHistory(prev => [{
-              stake,
-              target: targetMultiplier,
-              crash: crashMultiplier,
-              win: isWinner,
-              payout,
-              txUrl: explorerUrl
-            }, ...prev.slice(0, 4)]);
-
-            // Wait for animation to complete
-            setTimeout(() => {
-              // Set the final crash multiplier before stopping animation
-              setCurrentMultiplier(crashMultiplier);
-              
-              setLastResult({
-                success: true,
-                message: isWinner 
-                  ? `🎉 You won! Cashed out at ${targetMultiplier / 100}×!`
-                  : `💥 Crashed at ${crashMultiplier / 100}×! Better luck next time.`,
-                txUrl: explorerUrl,
-                crashMultiplier,
-                targetMultiplier,
-                isWinner,
-                payout
-              });
-              
-              // Stop animation after a brief moment to show the final multiplier
-              setTimeout(() => {
-                setIsAnimating(false);
-                setIsPlaying(false);
-                checkHouseBalance();
-              }, 500);
-            }, 3000);
-          },
-          onError: async (error) => {
-            console.error('Crash game failed:', error);
-            
-            // Check if this might be a wallet communication error after signing
-            const errorMessage = error.message || error.toString();
-            if (errorMessage.includes('channel closed') || 
-                errorMessage.includes('Unexpected error') ||
-                errorMessage.includes('listener indicated')) {
-              
-              // The transaction might have succeeded despite the communication error
-              setLastResult({
-                success: false,
-                message: "⚠️ Wallet communication lost. Checking recent transactions..."
-              });
-              
-              // Try to find the transaction in recent blockchain activity
-              setTimeout(async () => {
-                try {
-                  await checkRecentTransactions();
-                } catch (pollError) {
-                  console.error('Failed to check recent transactions:', pollError);
-                  setLastResult({
-                    success: false,
-                    message: "⚠️ Connection lost after signing. Check your wallet history - if the transaction succeeded, you'll see the result there. You may need to refresh the page."
-                  });
-                }
-                setIsAnimating(false);
-                setIsPlaying(false);
-              }, 3000);
-              
-            } else {
-              setLastResult({
-                success: false,
-                message: `Game failed: ${errorMessage}`
-              });
-              setIsAnimating(false);
-              setIsPlaying(false);
-            }
-          },
-        },
-      );
-    } catch (error) {
-      console.error('Crash game error:', error);
+      // Parse crash game result from transaction first
+      let crashMultiplier = null;
+      let didWin = false;
+      let actualPayout = 0;
       
-      const errorMessage = error?.toString() || 'Unknown error';
-      if (errorMessage.includes('channel closed') || 
-          errorMessage.includes('Unexpected error') ||
-          errorMessage.includes('listener indicated')) {
+      try {
+        // Check transaction events for crash game data
+        console.log('Transaction events:', result.events);
+        if (result.events && result.events.length > 0) {
+          const crashEvent = result.events.find((event: any) => 
+            event.type && event.type.includes('::crash::CrashEvent')
+          );
+          
+          console.log('Found crash event:', crashEvent);
+          
+          if (crashEvent && crashEvent.parsedJson) {
+            console.log('Crash event parsed JSON:', crashEvent.parsedJson);
+            crashMultiplier = parseInt(crashEvent.parsedJson.crash_x100);
+            didWin = crashEvent.parsedJson.win;
+            actualPayout = parseInt(crashEvent.parsedJson.payout) / 1_000_000_000;
+            
+            console.log(`🏍️ Crash Result: crashed at ${crashMultiplier/100}x, target was ${targetMultiplier/100}x, won: ${didWin}`);
+          } else {
+            console.log('No parsed JSON in crash event or no crash event found');
+          }
+        } else {
+          console.log('No events in transaction result');
+        }
+      } catch (e) {
+        console.error('Error parsing crash result:', e);
+      }
+      
+      // Set the result with crash value BEFORE starting animation
+      if (crashMultiplier !== null && !isNaN(crashMultiplier)) {
         setLastResult({
-          success: false,
-          message: "⚠️ Wallet connection lost. If you signed the transaction, check your wallet history to see if it went through."
-        });
-      } else {
-        setLastResult({
-          success: false,
-          message: `Transaction error: ${errorMessage}`
+          success: didWin,
+          message: '', // Will be set later
+          txUrl: `https://suiexplorer.com/txblock/${result.digest}?network=${NETWORK}`,
+          crashMultiplier,
+          targetMultiplier,
+          isWinner: didWin,
+          payout: actualPayout
         });
       }
+      
+      // Start animation with known crash value
+      setIsAnimating(true);
+      
+      // Calculate animation duration based on crash multiplier
+      // Use logarithmic scale for better pacing
+      const animationDuration = crashMultiplier 
+        ? Math.min(8000, 1000 + Math.log(crashMultiplier / 100) * 2000) // 1-8 seconds based on multiplier
+        : 3000; // Default 3 seconds
+      
+      setTimeout(() => {
+        setIsAnimating(false);
+        setIsPlaying(false);
+        
+        const crashValue = crashMultiplier !== null && !isNaN(crashMultiplier) 
+          ? (crashMultiplier / 100).toFixed(2) 
+          : '?';
+        const resultMessage = didWin 
+          ? `🎉 WIN! Cashed out at ${(targetMultiplier/100).toFixed(2)}x! Crash was at ${crashValue}x`
+          : `💥 CRASH! Hit ${crashValue}x before your ${(targetMultiplier/100).toFixed(2)}x target`;
+        
+        setLastResult({
+          success: didWin,
+          message: resultMessage,
+          txUrl: `https://suiexplorer.com/txblock/${result.digest}?network=${NETWORK}`,
+          crashMultiplier,
+          targetMultiplier,
+          isWinner: didWin,
+          payout: actualPayout
+        });
+        
+        // Update current multiplier to show final crash value
+        if (crashMultiplier !== null && !isNaN(crashMultiplier)) {
+          setCurrentMultiplier(crashMultiplier);
+        }
+        
+        // Add to game history
+        if (crashMultiplier !== null && !isNaN(crashMultiplier)) {
+          setGameHistory(prev => [{
+            stake: parseFloat(betAmount),
+            target: targetMultiplier,
+            crash: crashMultiplier,
+            win: didWin,
+            payout: actualPayout || 0,
+            txUrl: `https://suiexplorer.com/txblock/${result.digest}?network=${NETWORK}`
+          }, ...prev.slice(0, 4)]);
+        }
+        
+        checkHouseBalance();
+      }, animationDuration);
+
+    } catch (error: any) {
+      console.error('Crash game failed:', error);
       setIsAnimating(false);
-    } finally {
       setIsPlaying(false);
+      setLastResult({
+        success: false,
+        message: `Game failed: ${error.message || error.toString()}`
+      });
     }
   };
-
   useEffect(() => {
     if (currentAccount) {
       checkHouseBalance();
     }
   }, [currentAccount]);
-
+  
   return (
     <div className="min-h-screen bg-white">
       <GameNavigation />
@@ -642,10 +739,28 @@ export default function CrashPage() {
                       />
                       
                       {/* Live Multiplier Display */}
-                      {isAnimating && (
-                        <div className="absolute top-4 right-4 bg-black/90 text-white px-4 py-2 rounded-lg backdrop-blur">
-                          <div className="text-xl font-mono font-bold text-green-400">
+                      {(isAnimating || (lastResult && currentMultiplier > 100)) && (
+                        <div className={`absolute top-4 right-4 px-4 py-2 rounded-lg backdrop-blur transition-all duration-300 ${
+                          !isAnimating && lastResult && !lastResult.isWinner 
+                            ? 'bg-red-900/90 animate-pulse' 
+                            : isAnimating 
+                              ? 'bg-black/90'
+                              : 'bg-green-900/90'
+                        }`}>
+                          <div className={`text-xl font-mono font-bold ${
+                            !isAnimating && lastResult && !lastResult.isWinner
+                              ? 'text-red-400'
+                              : isAnimating
+                                ? 'text-green-400'
+                                : 'text-green-300'
+                          }`}>
                             {(currentMultiplier / 100).toFixed(2)}×
+                            {!isAnimating && lastResult && !lastResult.isWinner && (
+                              <div className="text-xs text-red-300 mt-1">CRASHED!</div>
+                            )}
+                            {!isAnimating && lastResult && lastResult.isWinner && (
+                              <div className="text-xs text-green-300 mt-1">CASHED OUT!</div>
+                            )}
                           </div>
                         </div>
                       )}
@@ -813,6 +928,14 @@ export default function CrashPage() {
                           <div className="text-sm font-mono text-gray-600">
                             {lastResult.message}
                           </div>
+                          {!lastResult.success && lastResult.message.includes('No recent crash game') && (
+                            <button
+                              onClick={checkRecentTransactions}
+                              className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                            >
+                              🔍 Check Transaction Status
+                            </button>
+                          )}
                           {lastResult.txUrl && (
                             <div className="text-xs">
                               <a 

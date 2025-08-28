@@ -44,31 +44,23 @@ module catsino::crash {
     /// Uses the formula: crash_x100 = floor(100 * SCALE / (SCALE - U))
     /// where U is uniform random in [1, 2^64-1] and SCALE = 2^64
     fun generate_crash_multiplier(rng: &mut random::RandomGenerator): u64 {
-        // Generate uniform random in range [1, 2^64-1]
-        let u = random::generate_u64_in_range(rng, 1, 18446744073709551615u64);
+        // Simplified crash multiplier generation
+        // Generate random number 1-10000 to get probabilities
+        let random_roll = random::generate_u64_in_range(rng, 1, 10000);
         
-        // Calculate crash_x100 = floor(100 * 2^64 / (2^64 - u))
-        // To avoid overflow, we use: crash_x100 = floor(100 * 2^64 / (2^64 - u))
-        // Which simplifies to: crash_x100 = floor(100 / (1 - u/2^64))
-        // For large scale, we approximate: crash_x100 ≈ floor(100 * 2^64 / (2^64 - u))
-        
-        let scale_minus_u = 18446744073709551616u64 - u; // 2^64 - u
-        if (scale_minus_u == 0) {
-            // Extremely rare case, return max
-            return MAX_TARGET_X100
-        };
-        
-        // Calculate crash multiplier with scaling to avoid overflow
-        // We'll use a simplified approach that maintains the heavy-tail property
-        let crash_x100 = (100 * 18446744073709551616u64) / scale_minus_u;
-        
-        // Cap at maximum to prevent extreme exposure
-        if (crash_x100 > MAX_TARGET_X100) {
-            MAX_TARGET_X100
-        } else if (crash_x100 < MIN_TARGET_X100) {
-            MIN_TARGET_X100
+        // Simple crash distribution - most games crash low, few go high
+        if (random_roll <= 5000) {
+            // 50% chance: 1.01x - 2.00x
+            MIN_TARGET_X100 + (random_roll * 99) / 5000
+        } else if (random_roll <= 8000) {
+            // 30% chance: 2.00x - 5.00x  
+            200 + ((random_roll - 5000) * 300) / 3000
+        } else if (random_roll <= 9500) {
+            // 15% chance: 5.00x - 10.00x
+            500 + ((random_roll - 8000) * 500) / 1500
         } else {
-            crash_x100
+            // 5% chance: 10.00x - 30.00x (max)
+            1000 + ((random_roll - 9500) * 2000) / 500
         }
     }
 
