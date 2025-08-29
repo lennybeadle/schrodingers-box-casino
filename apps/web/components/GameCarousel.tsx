@@ -127,13 +127,17 @@ export function GameCarousel() {
       zIndex = 0;
     }
 
+    // Extract translation values for cleaner transform
+    const translateX = transform.includes('translateX') ? transform.match(/translateX\(([^)]+)\)/)?.[1] || '0' : '0';
+    const translateZ = transform.includes('translateZ') ? transform.match(/translateZ\(([^)]+)\)/)?.[1] || '0' : '0';
+    
     return {
-      transform: `${transform} scale(${scale})`,
+      transform: `translateX(${translateX}) scale(${scale})`,
       opacity,
       zIndex,
-      filter: blur > 0 ? `blur(${blur}px)` : 'none',
       backfaceVisibility: 'hidden',
       WebkitFontSmoothing: 'antialiased',
+      MozOsxFontSmoothing: 'grayscale',
       textRendering: 'optimizeLegibility',
     };
   };
@@ -142,7 +146,11 @@ export function GameCarousel() {
     <div className="relative w-full max-w-6xl mx-auto">
       {/* Carousel Container */}
       <div className="relative h-[320px] overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center" style={{
+          WebkitFontSmoothing: 'antialiased',
+          MozOsxFontSmoothing: 'grayscale',
+          textRendering: 'optimizeLegibility'
+        }}>
           {games.map((game, index) => {
             const style = getCardStyle(index);
             const isCenter = index === currentIndex;
@@ -150,18 +158,13 @@ export function GameCarousel() {
             return (
               <div
                 key={game.id}
-                className="absolute transition-all duration-500 ease-out will-change-transform"
-                style={{
-                  ...style,
-                  perspective: '1000px',
-                  transformStyle: 'preserve-3d',
-                  willChange: 'transform, opacity',
-                }}
+                className="absolute transition-all duration-500 ease-out"
+                style={style}
                 onMouseEnter={() => setIsAutoPlaying(false)}
                 onMouseLeave={() => setIsAutoPlaying(true)}
               >
                 {game.locked ? (
-                  <div className={`w-64 bg-white/40 dark:bg-gray-800/40 backdrop-blur rounded-2xl p-6 border ${isCenter ? 'border-gray-300 dark:border-gray-600' : 'border-gray-200 dark:border-gray-700'} shadow-lg`}>
+                  <div className={`w-64 bg-white/80 dark:bg-gray-800/80 rounded-2xl p-6 border ${isCenter ? 'border-gray-300 dark:border-gray-600' : 'border-gray-200 dark:border-gray-700'} shadow-lg`}>
                     <div className="text-center space-y-3">
                       <div className="relative">
                         <img 
@@ -177,9 +180,9 @@ export function GameCarousel() {
                           />
                         </div>
                       </div>
-                      <h3 className="text-lg font-light text-gray-500 dark:text-gray-400">{game.name}</h3>
-                      <p className="text-sm text-gray-400 dark:text-gray-500">{game.description}</p>
-                      <div className="text-xs text-orange-600 dark:text-orange-400 font-medium">
+                      <h3 className="text-lg font-light text-gray-500 dark:text-gray-400" style={{WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility'}}>{game.name}</h3>
+                      <p className="text-sm text-gray-400 dark:text-gray-500" style={{WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility'}}>{game.description}</p>
+                      <div className="text-xs text-orange-600 dark:text-orange-400 font-medium" style={{WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility'}}>
                         {game.unlockMessage}
                       </div>
                     </div>
@@ -187,7 +190,7 @@ export function GameCarousel() {
                 ) : (
                   <Link 
                     href={game.href}
-                    className={`block w-64 bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 border ${isCenter ? 'border-czar-gold/30 dark:border-czar-gold/40 shadow-2xl' : 'border-gray-100 dark:border-gray-700 shadow-lg'} transition-all duration-300 ${isCenter ? 'hover:scale-105' : ''}`}
+                    className={`block w-64 bg-white/90 dark:bg-gray-800/90 rounded-2xl p-6 border ${isCenter ? 'border-czar-gold/30 dark:border-czar-gold/40 shadow-2xl' : 'border-gray-100 dark:border-gray-700 shadow-lg'} transition-all duration-300 ${isCenter ? 'hover:scale-105' : ''}`}
                     onClick={(e) => !isCenter && e.preventDefault()}
                   >
                     <div className="text-center space-y-3">
@@ -196,10 +199,10 @@ export function GameCarousel() {
                         alt={game.name}
                         className={`w-20 h-20 mx-auto rounded-full ${isCenter ? '' : 'opacity-90'}`}
                       />
-                      <h3 className="text-lg font-light text-gray-900 dark:text-gray-100">{game.name}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">{game.description}</p>
+                      <h3 className="text-lg font-light text-gray-900 dark:text-gray-100" style={{WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility'}}>{game.name}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300" style={{WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility'}}>{game.description}</p>
                       {isCenter && (
-                        <div className="text-xs text-czar-gold dark:text-caesar-gold font-medium animate-pulse">
+                        <div className="text-xs text-czar-gold dark:text-caesar-gold font-medium animate-pulse" style={{WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility'}}>
                           Click to play →
                         </div>
                       )}
