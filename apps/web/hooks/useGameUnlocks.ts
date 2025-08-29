@@ -49,41 +49,65 @@ export function useGameUnlocks() {
     try {
       setLoading(true);
 
-      // Fetch all game events (without sender filter) then filter by player
-      const [coinflipEvents, crashEvents, revolverEvents, pumpEvents] = await Promise.all([
-        // Coinflip events (BetPlaced)
+      // Define both package IDs to preserve game history
+      const OLD_PACKAGE_ID = '0xb2a6c0ebfe6fdac6d8261fd0df496cc90522d745aada4a0bf699c5f32406d583';
+      const CURRENT_PACKAGE_ID = process.env.NEXT_PUBLIC_PACKAGE_ID || OLD_PACKAGE_ID;
+
+      // Fetch all game events from BOTH old and new packages
+      const [
+        coinflipEventsOld, coinflipEventsCurrent,
+        crashEventsOld, crashEventsCurrent,
+        revolverEventsOld, revolverEventsCurrent,
+        pumpEvents
+      ] = await Promise.all([
+        // Coinflip events from old package
         suiClient.queryEvents({
-          query: {
-            MoveEventType: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::casino::BetPlaced`
-          },
-          limit: 1000, // Get more to ensure we count all games
-          order: 'descending'
-        }),
-        // Crash events (CrashEvent) 
-        suiClient.queryEvents({
-          query: {
-            MoveEventType: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::crash::CrashEvent`
-          },
+          query: { MoveEventType: `${OLD_PACKAGE_ID}::casino::BetPlaced` },
           limit: 1000,
           order: 'descending'
         }),
-        // Revolver events (SpinEvent)
+        // Coinflip events from current package
         suiClient.queryEvents({
-          query: {
-            MoveEventType: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::revolver::SpinEvent`
-          },
+          query: { MoveEventType: `${CURRENT_PACKAGE_ID}::casino::BetPlaced` },
           limit: 1000,
           order: 'descending'
         }),
-        // Pump events (PumpEvent)
+        // Crash events from old package
         suiClient.queryEvents({
-          query: {
-            MoveEventType: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::pump::PumpEvent`
-          },
+          query: { MoveEventType: `${OLD_PACKAGE_ID}::crash::CrashEvent` },
+          limit: 1000,
+          order: 'descending'
+        }),
+        // Crash events from current package
+        suiClient.queryEvents({
+          query: { MoveEventType: `${CURRENT_PACKAGE_ID}::crash::CrashEvent` },
+          limit: 1000,
+          order: 'descending'
+        }),
+        // Revolver events from old package
+        suiClient.queryEvents({
+          query: { MoveEventType: `${OLD_PACKAGE_ID}::revolver::SpinEvent` },
+          limit: 1000,
+          order: 'descending'
+        }),
+        // Revolver events from current package
+        suiClient.queryEvents({
+          query: { MoveEventType: `${CURRENT_PACKAGE_ID}::revolver::SpinEvent` },
+          limit: 1000,
+          order: 'descending'
+        }),
+        // Pump events (only in new package)
+        suiClient.queryEvents({
+          query: { MoveEventType: `${CURRENT_PACKAGE_ID}::pump::PumpEvent` },
           limit: 1000,
           order: 'descending'
         })
       ]);
+
+      // Combine events from both packages
+      const coinflipEvents = { data: [...(coinflipEventsOld.data || []), ...(coinflipEventsCurrent.data || [])] };
+      const crashEvents = { data: [...(crashEventsOld.data || []), ...(crashEventsCurrent.data || [])] };
+      const revolverEvents = { data: [...(revolverEventsOld.data || []), ...(revolverEventsCurrent.data || [])] };
 
       // Filter events by the current player address
       const playerCoinflipEvents = coinflipEvents.data.filter(event => 
