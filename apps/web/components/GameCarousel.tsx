@@ -32,7 +32,7 @@ export function GameCarousel() {
       id: 'crash',
       name: 'Cat Crash',
       description: 'Multiplier crash • Up to 30x',
-      image: 'https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/crash.webp',
+      image: 'https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/motorcycle.webp',
       href: '/play/crash',
       locked: !unlocks.crash,
       unlockMessage: unlocksLoading ? 'Loading...' : `Play ${getProgressToUnlock('crash').remaining} more coinflip games`,
@@ -102,25 +102,25 @@ export function GameCarousel() {
     } else if (adjustedDiff === 1) {
       // Right card
       transform = 'translateX(280px) translateZ(0)';
-      scale = 0.85;
+      scale = 0.9;
       zIndex = 20;
-      opacity = 0.7;
-      blur = 1;
+      opacity = 0.8;
+      blur = 0;
     } else if (adjustedDiff === -1) {
       // Left card
       transform = 'translateX(-280px) translateZ(0)';
-      scale = 0.85;
+      scale = 0.9;
       zIndex = 20;
-      opacity = 0.7;
-      blur = 1;
+      opacity = 0.8;
+      blur = 0;
     } else if (adjustedDiff === 2 || adjustedDiff === -2) {
       // Far cards
       const direction = adjustedDiff > 0 ? 1 : -1;
       transform = `translateX(${direction * 480}px) translateZ(-100px)`;
-      scale = 0.7;
+      scale = 0.75;
       zIndex = 10;
-      opacity = 0.3;
-      blur = 2;
+      opacity = 0.4;
+      blur = 0;
     } else {
       // Hidden cards
       opacity = 0;
@@ -132,6 +132,9 @@ export function GameCarousel() {
       opacity,
       zIndex,
       filter: blur > 0 ? `blur(${blur}px)` : 'none',
+      backfaceVisibility: 'hidden',
+      WebkitFontSmoothing: 'antialiased',
+      textRendering: 'optimizeLegibility',
     };
   };
 
@@ -147,11 +150,12 @@ export function GameCarousel() {
             return (
               <div
                 key={game.id}
-                className="absolute transition-all duration-500 ease-out"
+                className="absolute transition-all duration-500 ease-out will-change-transform"
                 style={{
                   ...style,
                   perspective: '1000px',
                   transformStyle: 'preserve-3d',
+                  willChange: 'transform, opacity',
                 }}
                 onMouseEnter={() => setIsAutoPlaying(false)}
                 onMouseLeave={() => setIsAutoPlaying(true)}
