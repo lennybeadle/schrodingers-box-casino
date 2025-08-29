@@ -236,21 +236,6 @@ export function GameCarousel() {
         </svg>
       </button>
 
-      {/* Dots Indicator */}
-      <div className="flex justify-center gap-2 mt-6">
-        {games.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              index === currentIndex 
-                ? 'w-8 bg-czar-gold dark:bg-caesar-gold' 
-                : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
-            }`}
-            aria-label={`Go to game ${index + 1}`}
-          />
-        ))}
-      </div>
     </div>
   );
 }
