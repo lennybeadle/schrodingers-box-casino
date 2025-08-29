@@ -18,6 +18,9 @@ export function GameCarousel() {
   const { unlocks, getProgressToUnlock, loading: unlocksLoading } = useGameUnlocks();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  
+  // Debug logging
+  console.log('GameCarousel unlocks:', unlocks);
 
   const games: Game[] = [
     {
@@ -54,6 +57,15 @@ export function GameCarousel() {
       href: '/play/pump',
       locked: !unlocks.pump,
       unlockMessage: unlocksLoading ? 'Loading...' : `Play ${getProgressToUnlock('pump').remaining} more revolver games`,
+    },
+    {
+      id: 'blend',
+      name: 'Will It Blend',
+      description: 'Ladder survival • 3% house edge',
+      image: 'https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/blend_win.webp',
+      href: '/play/blend',
+      locked: !unlocks.blend,
+      unlockMessage: unlocksLoading ? 'Loading...' : `Play ${getProgressToUnlock('blend').remaining} more pump games`,
     },
   ];
 

@@ -4,15 +4,18 @@ import Link from 'next/link';
 import { useGameUnlocks } from '@/hooks/useGameUnlocks';
 
 interface GameLockedOverlayProps {
-  game: 'crash' | 'revolver' | 'pump';
+  game: 'crash' | 'revolver' | 'pump' | 'blend';
   gameTitle: string;
   unlockMessage: string;
 }
 
 export function GameLockedOverlay({ game, gameTitle, unlockMessage }: GameLockedOverlayProps) {
-  const { unlocks, getProgressToUnlock, loading } = useGameUnlocks();
+  const { unlocks, getProgressToUnlock, loading, hasLoadedOnce } = useGameUnlocks();
 
-  if (loading) {
+  console.log(`GameLockedOverlay [${game}]:`, { loading, unlocked: unlocks[game], hasLoadedOnce });
+
+  // If we're loading and haven't loaded once before, show loading state
+  if (loading && !hasLoadedOnce) {
     return (
       <div className="fixed inset-0 z-50 bg-gray-900/80 backdrop-blur-md flex items-center justify-center">
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md mx-4 text-center border border-gray-200 dark:border-gray-700 shadow-2xl">
@@ -29,8 +32,8 @@ export function GameLockedOverlay({ game, gameTitle, unlockMessage }: GameLocked
   }
 
   const progress = getProgressToUnlock(game);
-  const prerequisiteGame = game === 'crash' ? 'coinflip' : game === 'revolver' ? 'crash' : 'revolver';
-  const prerequisiteGameTitle = game === 'crash' ? 'Caesar\'s CoinFlip' : game === 'revolver' ? 'Cat Crash' : 'Revolver Roulette';
+  const prerequisiteGame = game === 'crash' ? 'coinflip' : game === 'revolver' ? 'crash' : game === 'pump' ? 'revolver' : 'pump';
+  const prerequisiteGameTitle = game === 'crash' ? 'Caesar\'s CoinFlip' : game === 'revolver' ? 'Cat Crash' : game === 'pump' ? 'Revolver Roulette' : 'Pump or Dump';
 
   return (
     <div className="fixed inset-0 z-50 bg-gray-900/80 backdrop-blur-md flex items-center justify-center">
@@ -77,7 +80,7 @@ export function GameLockedOverlay({ game, gameTitle, unlockMessage }: GameLocked
         {/* Action Buttons */}
         <div className="space-y-3">
           <Link
-            href={game === 'crash' ? "/play/coinflip" : game === 'revolver' ? "/play/crash" : "/play/revolver"}
+            href={game === 'crash' ? "/play/coinflip" : game === 'revolver' ? "/play/crash" : game === 'pump' ? "/play/revolver" : "/play/pump"}
             className="block w-full py-3 bg-gradient-to-r from-czar-gold via-caesar-gold to-czar-bronze text-black font-semibold rounded-lg hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
           >
             Play {prerequisiteGameTitle}

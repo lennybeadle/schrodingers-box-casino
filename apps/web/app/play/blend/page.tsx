@@ -13,7 +13,7 @@ import { UnlockProgress } from '@/components/UnlockProgress';
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 
-export default function PumpPage() {
+export default function BlendPage() {
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const suiClient = useSuiClient();
@@ -25,7 +25,7 @@ export default function PumpPage() {
   const NETWORK = process.env.NEXT_PUBLIC_SUI_NETWORK || 'testnet';
 
   const [betAmount, setBetAmount] = useState<string>('0.1');
-  const [threshold, setThreshold] = useState<number>(50); // Default 50% win chance
+  const [depth, setDepth] = useState<number>(3); // Default depth 3
   const [isPlaying, setIsPlaying] = useState(false);
   const [lastResult, setLastResult] = useState<{
     success: boolean;
@@ -33,8 +33,8 @@ export default function PumpPage() {
     txUrl?: string;
     isWinner?: boolean;
     payout?: number;
-    randomResult?: number;
-    threshold?: number;
+    stepsSurvived?: number;
+    depth?: number;
   } | null>(null);
   const [showWinImage, setShowWinImage] = useState(false);
   const [showLossImage, setShowLossImage] = useState(false);
@@ -52,8 +52,8 @@ export default function PumpPage() {
   });
 
   // Calculate multiplier and win probability
-  const multiplier = threshold > 0 ? 97 / threshold : 0;
-  const winProbability = threshold;
+  const multiplier = depth > 0 ? (97 * Math.pow(3, depth)) / (100 * Math.pow(2, depth)) : 0;
+  const winProbability = depth > 0 ? (Math.pow(2, depth) * 100) / Math.pow(3, depth) : 100;
   const potentialPayout = parseFloat(betAmount || '0') * multiplier;
 
   // Check house balance
@@ -109,7 +109,7 @@ export default function PumpPage() {
       setDialog({
         isOpen: true,
         title: 'Bet Too Large',
-        message: 'Your bet is too large for the current house balance. Please reduce your bet amount or choose a higher threshold.',
+        message: 'Your bet is too large for the current house balance. Please reduce your bet amount or choose a lower depth.',
         type: 'warning'
       });
       return;
@@ -134,15 +134,15 @@ export default function PumpPage() {
 
       // Create transaction
       const txb = new Transaction();
-      txb.setGasBudget(100_000_000); // 0.1 SUI gas budget - increased for network fee estimation
+      txb.setGasBudget(100_000_000); // 0.1 SUI gas budget
       
-      // Ensure threshold is valid u8 (1-98)
-      const validThreshold = Math.min(Math.max(Math.floor(threshold), 1), 98);
+      // Ensure depth is valid u8 (1-6)
+      const validDepth = Math.min(Math.max(Math.floor(depth), 1), 6);
       
-      console.log('Creating pump transaction:', {
+      console.log('Creating blend transaction:', {
         packageId: PACKAGE_ID,
         houseId: HOUSE_OBJECT_ID,
-        threshold: validThreshold,
+        depth: validDepth,
         amountMist,
         amountSui
       });
@@ -150,9 +150,9 @@ export default function PumpPage() {
       const [coin] = txb.splitCoins(txb.gas, [amountMist]);
 
       txb.moveCall({
-        target: `${PACKAGE_ID}::pump::play_pump_or_dump`,
+        target: `${PACKAGE_ID}::blend::play_blend`,
         arguments: [
-          txb.pure.u8(validThreshold),
+          txb.pure.u8(validDepth),
           coin,
           txb.object('0x8'), // Random object
           txb.object(HOUSE_OBJECT_ID),
@@ -180,7 +180,7 @@ export default function PumpPage() {
       // Parse events to get result
       let isWinner = false;
       let payout = 0;
-      let randomResult = 0;
+      let stepsSurvived = 0;
       let message = 'Bet placed successfully!';
 
       try {
@@ -193,92 +193,79 @@ export default function PumpPage() {
 
         if (txResult.events && txResult.events.length > 0) {
           for (const event of txResult.events) {
-            if (event.type && event.type.includes('PumpEvent')) {
+            if (event.type && event.type.includes('BlendEvent')) {
               const eventData = event.parsedJson as any;
               isWinner = eventData.win;
               payout = parseInt(eventData.payout) / 1_000_000_000;
-              randomResult = parseInt(eventData.result);
-
-              console.log('✅ PumpEvent found!', {
-                isWinner,
-                payout: eventData.payout,
-                randomResult,
-                threshold: eventData.threshold
-              });
-
-              message = isWinner
-                ? `🚀 PUMP! You won ${payout.toFixed(3)} SUI! (Rolled: ${randomResult}, Threshold: ${threshold})`
-                : `📉 DUMP! You lost. (Rolled: ${randomResult}, Threshold: ${threshold})`;
+              stepsSurvived = parseInt(eventData.steps_survived);
+              message = isWinner 
+                ? `🎉 You survived all ${depth} steps! Won ${payout.toFixed(3)} SUI`
+                : `😵 Blended at step ${stepsSurvived + 1}! Better luck next time.`;
               break;
             }
           }
         }
-      } catch (eventError) {
-        console.error('Error fetching events:', eventError);
-        message = 'Bet placed successfully! Check the advanced interface for results once indexing completes.';
+      } catch (error) {
+        console.error('Error parsing events:', error);
       }
 
-      const explorerUrl = NETWORK === 'mainnet'
-        ? `https://suiexplorer.com/txblock/${result.digest}`
-        : `https://suiexplorer.com/txblock/${result.digest}?network=${NETWORK}`;
+      const networkName = NETWORK === 'testnet' ? 'testnet' : 'mainnet';
+      const txUrl = `https://suiscan.xyz/${networkName}/tx/${result.digest}`;
 
-      const gameResult = {
+      setLastResult({
         success: true,
         message,
-        txUrl: explorerUrl,
+        txUrl,
         isWinner,
         payout,
-        randomResult,
-        threshold
-      };
+        stepsSurvived,
+        depth: validDepth
+      });
 
-      setLastResult(gameResult);
-      
-      // Update house balance
-      checkHouseBalance();
-
-      // Show appropriate image after a delay
+      // Show appropriate image with delay
       setTimeout(() => {
         if (isWinner) {
           setShowWinImage(true);
         } else {
           setShowLossImage(true);
         }
-      }, 1000);
+      }, 300);
+
+      // Refresh house balance
+      await checkHouseBalance();
 
     } catch (error: any) {
-      console.error('Play failed:', error);
+      setIsPlaying(false);
+      console.error('Error playing blend:', error);
       
-      let errorMessage = 'Transaction failed';
-      
+      let errorMessage = 'Failed to play blend game';
       if (error.message) {
-        if (error.message.includes('Insufficient gas')) {
-          errorMessage = 'Insufficient gas for transaction. Please ensure you have enough SUI for gas fees.';
-        } else if (error.message.includes('GasBalanceTooLow') || error.message.includes('gas')) {
-          errorMessage = 'Network fee error: Not enough SUI for gas. Try reducing bet amount or add more SUI to wallet.';
-        } else if (error.message.includes('User rejected') || error.message.includes('cancelled')) {
-          errorMessage = 'Transaction cancelled by user';
-        } else {
+        if (error.message.includes('Insufficient balance')) {
           errorMessage = error.message;
+        } else if (error.message.includes('rejected')) {
+          errorMessage = 'Transaction was rejected';
+        } else if (error.message.includes('InsufficientGas')) {
+          errorMessage = 'Insufficient gas for transaction';
         }
       }
-      
-      setLastResult({
-        success: false,
-        message: errorMessage
+
+      setDialog({
+        isOpen: true,
+        title: 'Transaction Failed',
+        message: errorMessage,
+        type: 'error'
       });
-      setIsPlaying(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
-      <GameLockedOverlay 
-        game="pump"
-        gameTitle="Pump or Dump" 
-        unlockMessage="Complete 25 Revolver Roulette games to unlock the market prediction arena."
-      />
+    <div className="min-h-screen bg-white dark:bg-gray-900 relative transition-colors duration-300">
       <GameNavigation />
+      <GameLockedOverlay 
+        game="blend" 
+        gameTitle="Will It Blend" 
+        unlockMessage="Complete 10 Pump or Dump games to unlock Will It Blend! Survive the ladder by making it through all steps without getting blended." 
+      />
       
       {/* Network Status Banner */}
       <div className={`px-6 py-3 ${
@@ -319,14 +306,14 @@ export default function PumpPage() {
       <main className="relative">
         {!currentAccount ? (
           /* Welcome State */
-          <div className="min-h-screen flex items-center justify-center px-6 pb-32">
+          <div className="min-h-screen flex items-center justify-center px-6 pb-48">
             <div className="max-w-4xl mx-auto text-center space-y-16">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 via-red-500/10 to-green-500/10 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 via-purple-500/10 to-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
                 <div className="relative">
                   <img 
-                    src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/pump.webp" 
-                    alt="Pump Cat" 
+                    src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/blend_win.webp" 
+                    alt="Blend Cat" 
                     className="w-80 h-80 mx-auto animate-caesar-float filter drop-shadow-2xl opacity-90" 
                   />
                 </div>
@@ -335,20 +322,20 @@ export default function PumpPage() {
               <div className="space-y-12">
                 <div className="space-y-6">
                   <h1 className="text-6xl font-thin text-gray-900 dark:text-gray-100 tracking-tight leading-tight">
-                    Pump or <span className="bg-gradient-to-r from-green-500 via-red-500 to-green-500 bg-clip-text text-transparent">Dump</span>
+                    Will It <span className="bg-gradient-to-r from-orange-500 via-purple-500 to-orange-500 bg-clip-text text-transparent">Blend</span>
                   </h1>
                   
                   <div className="w-24 h-px bg-gradient-to-r from-transparent via-gray-400 dark:via-gray-500 to-transparent mx-auto"></div>
                   
                   <p className="text-lg text-gray-600 dark:text-gray-300 font-light max-w-2xl mx-auto leading-relaxed">
-                    Predict the market with threshold-based betting. 
+                    Survive the ladder! Each step has a 2/3 chance to survive. 
                     <br className="hidden sm:block" />
-                    Choose your win probability and multiplier.
+                    Choose your depth and risk it all for bigger rewards.
                   </p>
                 </div>
 
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 max-w-md mx-auto border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-lg font-light text-gray-700 dark:text-gray-300 mb-4">Connect wallet to trade</h3>
+                  <h3 className="text-lg font-light text-gray-700 dark:text-gray-300 mb-4">Connect wallet to blend</h3>
                   <SuiWalletButton />
                 </div>
               </div>
@@ -356,23 +343,23 @@ export default function PumpPage() {
           </div>
         ) : (
           /* Game State */
-          <div className="min-h-screen flex items-center justify-center px-6 pb-32">
+          <div className="min-h-screen flex items-center justify-center px-6 pb-48">
             <div className="max-w-6xl mx-auto">
               <div className="grid lg:grid-cols-5 gap-16 items-center">
                 
-                {/* Left - Market Display */}
+                {/* Left - Ladder Display */}
                 <div className="lg:col-span-2 text-center space-y-8">
                   <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 via-red-500/10 to-green-500/10 rounded-full blur-3xl animate-pulse"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 via-purple-500/10 to-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
                     
-                    {/* Market Display */}
+                    {/* Ladder Display */}
                     <div className="relative w-72 h-72 mx-auto">
                       {!lastResult || isPlaying ? (
                         /* Default/Loading State */
                         <div className="relative w-full h-full animate-caesar-float">
                           <img 
-                            src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/pump.webp" 
-                            alt="Market Pump" 
+                            src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/blend_win.webp" 
+                            alt="Will It Blend" 
                             className="w-full h-full object-contain filter drop-shadow-2xl"
                           />
                         </div>
@@ -380,32 +367,32 @@ export default function PumpPage() {
                         /* Result State */
                         <div className="w-full h-full relative animate-caesar-float">
                           {lastResult.success && lastResult.isWinner ? (
-                            /* Win state - show pump with enhanced effects */
+                            /* Win state - show survival with enhanced effects */
                             <>
                               <img 
-                                src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/pump.webp"
-                                alt="Pump - You Win!"
+                                src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/blend_win.webp"
+                                alt="Survived - You Win!"
                                 className={`absolute inset-0 w-full h-full object-contain filter drop-shadow-2xl transition-all duration-700 ease-in-out ${
                                   showWinImage ? 'opacity-100 filter brightness-125 saturate-150 contrast-110' : 'opacity-100'
                                 }`}
                               />
                             </>
                           ) : (
-                            /* Loss state - crossfade to dump */
+                            /* Loss state - crossfade to blend */
                             <>
-                              {/* Normal pump image */}
+                              {/* Normal image */}
                               <img 
-                                src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/pump.webp"
-                                alt="Market"
+                                src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/blend_win.webp"
+                                alt="Ladder"
                                 className={`absolute inset-0 w-full h-full object-contain filter drop-shadow-2xl transition-opacity duration-700 ease-in-out ${
                                   showLossImage ? 'opacity-0' : 'opacity-100'
                                 }`}
                               />
                               
-                              {/* Dump image */}
+                              {/* Blended image */}
                               <img 
-                                src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/dump.webp"
-                                alt="Dump - Market Crashed"
+                                src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/blend_lose.webp"
+                                alt="Blended - Game Over"
                                 className={`absolute inset-0 w-full h-full object-contain filter drop-shadow-2xl transition-all duration-700 ease-in-out ${
                                   showLossImage 
                                     ? 'opacity-100 filter grayscale brightness-50 contrast-75 saturate-0' 
@@ -421,11 +408,11 @@ export default function PumpPage() {
                   
                   <div className="space-y-4">
                     <h2 className="text-4xl font-thin text-gray-900 dark:text-gray-100">
-                      Market Prediction
+                      Ladder Challenge
                     </h2>
                     <div className="w-16 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent mx-auto"></div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
-                      <p>Threshold: {threshold}% • Win Probability: {winProbability}%</p>
+                      <p>Depth: {depth} • Win Probability: {winProbability.toFixed(1)}%</p>
                       <p>Multiplier: {multiplier.toFixed(2)}x • 3% House Edge</p>
                     </div>
                   </div>
@@ -445,7 +432,7 @@ export default function PumpPage() {
                     setBetAmount={setBetAmount}
                     multiplier={multiplier}
                     isPlaying={isPlaying}
-                    gameName="Pump or Dump"
+                    gameName="Will It Blend"
                   />
 
                   {/* House Balance */}
@@ -458,28 +445,28 @@ export default function PumpPage() {
                     </div>
                   </div>
 
-                  {/* Threshold Slider */}
+                  {/* Depth Selector */}
                   <div className="space-y-4">
                     <div className="text-center">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Win Threshold</h3>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Ladder Depth</h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Win if random result &lt; {threshold}
+                        Survive {depth} steps to win
                       </p>
                     </div>
                     
                     <div className="space-y-3">
                       <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
-                        <span>1% (97x payout)</span>
-                        <span>98% (0.99x payout)</span>
+                        <span>1 step (1.46x payout)</span>
+                        <span>6 steps (49.22x payout)</span>
                       </div>
                       
                       <div className="relative">
                         <input
                           type="range"
                           min="1"
-                          max="98"
-                          value={threshold}
-                          onChange={(e) => setThreshold(parseInt(e.target.value))}
+                          max="6"
+                          value={depth}
+                          onChange={(e) => setDepth(parseInt(e.target.value))}
                           disabled={isPlaying}
                           className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
                         />
@@ -507,7 +494,7 @@ export default function PumpPage() {
                       </div>
                       
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-czar-gold">{threshold}%</div>
+                        <div className="text-2xl font-bold text-czar-gold">{depth} steps</div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
                           Win pays {multiplier.toFixed(2)}x incl. stake (3% edge)
                         </div>
@@ -523,19 +510,19 @@ export default function PumpPage() {
                     <button 
                       onClick={handlePlay}
                       disabled={isPlaying || !currentAccount}
-                      className="group relative w-full py-8 bg-gradient-to-r from-green-600 via-green-700 to-red-600 text-white overflow-hidden transition-all duration-700 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
+                      className="group relative w-full py-8 bg-gradient-to-r from-orange-600 via-purple-700 to-orange-600 text-white overflow-hidden transition-all duration-700 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
                       style={{ borderRadius: '2px' }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-green-400 via-yellow-400 to-red-400 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-purple-400 to-orange-400 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                       <span className="relative z-10 flex items-center justify-center gap-4 text-xl font-light tracking-widest">
                         {isPlaying ? (
                           <>
                             <div className="w-6 h-6 border border-white/30 border-t-white rounded-full animate-spin"></div>
-                            READING MARKET
+                            BLENDING...
                           </>
                         ) : (
                           <>
-                            PUMP OR DUMP
+                            WILL IT BLEND?
                           </>
                         )}
                       </span>
@@ -545,13 +532,13 @@ export default function PumpPage() {
                     {lastResult && (
                       <div className="text-center py-8 space-y-4 animate-in fade-in duration-1000">
                         <div className="text-6xl">
-                          {lastResult.success && lastResult.isWinner ? '🚀' : '📉'}
+                          {lastResult.success && lastResult.isWinner ? '🏆' : '💥'}
                         </div>
                         <div className="space-y-2">
                           <div className={`text-2xl font-light ${
                             lastResult.success && lastResult.isWinner ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                           }`}>
-                            {lastResult.success && lastResult.isWinner ? 'PUMPED!' : 'DUMPED!'}
+                            {lastResult.success && lastResult.isWinner ? 'SURVIVED!' : 'BLENDED!'}
                           </div>
                           <div className="text-sm font-mono text-gray-600 dark:text-gray-300">
                             {lastResult.message}
@@ -578,6 +565,73 @@ export default function PumpPage() {
           </div>
         )}
       </main>
+
+      {/* Footer */}
+      <footer className="absolute bottom-0 left-0 right-0 px-6 py-8">
+        <div className="max-w-7xl mx-auto text-center space-y-6">
+          <div className="w-16 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent mx-auto"></div>
+          
+          <p className="text-xs text-gray-400 dark:text-gray-500 font-mono tracking-wider">
+            Provably-Fair • On-Chain Sui Casino • Ultra-low fees
+          </p>
+          
+          <div className="flex items-center justify-center gap-2 text-xs mb-4">
+            <Link 
+              href="/play" 
+              className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-300 underline decoration-dotted underline-offset-4"
+            >
+              Advanced Interface
+            </Link>
+          </div>
+          
+          <div className="flex items-center justify-center gap-6 text-xs">
+            <a 
+              href="https://www.youtube.com/@catsinofun" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-300"
+              title="YouTube"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+            </a>
+            <a 
+              href="https://www.tiktok.com/@catsinofun" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-300"
+              title="TikTok"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-.88-.05A6.33 6.33 0 0 0 5.76 20.3 6.33 6.33 0 0 0 17.47 14.5V6.7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-2.65-1.52z"/>
+              </svg>
+            </a>
+            <a 
+              href="https://x.com/catsinofun" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-300"
+              title="X (Twitter)"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </a>
+            <a 
+              href="https://discord.gg/zaxbFxVBHE" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-300"
+              title="Discord"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0190 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9460 2.4189-2.1568 2.4189Z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </footer>
 
       {/* Dialog */}
       <Dialog

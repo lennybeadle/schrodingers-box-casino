@@ -15,6 +15,7 @@ const games: Game[] = [
   { path: '/play/crash', name: 'Cat Crash', icon: '🏍️' },
   { path: '/play/revolver', name: 'Revolver', icon: '🔫' },
   { path: '/play/pump', name: 'Pump/Dump', icon: '📈' },
+  { path: '/play/blend', name: 'Will It Blend', icon: '🌀' },
 ];
 
 export function GameNavigation() {
@@ -34,6 +35,7 @@ export function GameNavigation() {
     if (path === '/play/crash') return unlocks.crash;
     if (path === '/play/revolver') return unlocks.revolver;
     if (path === '/play/pump') return unlocks.pump || false; // Default to locked for now
+    if (path === '/play/blend') return unlocks.blend;
     return false;
   };
   

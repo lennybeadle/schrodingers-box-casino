@@ -49,33 +49,99 @@ export default function Play() {
     try {
       setLoading(true);
       
-      // Fetch all three types of game events
-      const [coinflipEvents, revolverEvents, crashEvents] = await Promise.all([
-        // Coinflip events (BetPlaced)
+      // Define all package IDs to preserve game history
+      const OLD_PACKAGE_ID = '0xb2a6c0ebfe6fdac6d8261fd0df496cc90522d745aada4a0bf699c5f32406d583';
+      const INTERMEDIATE_PACKAGE_ID = '0x21897e3702d4fc77e8753a4dc8e7a46e4c6872f17ea88fe4e2c02aa6c9eb7533';
+      const CURRENT_PACKAGE_ID = process.env.NEXT_PUBLIC_PACKAGE_ID || OLD_PACKAGE_ID;
+
+      // Fetch all game events from ALL packages
+      const [
+        coinflipEventsOld, coinflipEventsIntermediate, coinflipEventsCurrent,
+        revolverEventsOld, revolverEventsIntermediate, revolverEventsCurrent,
+        crashEventsOld, crashEventsIntermediate, crashEventsCurrent,
+        pumpEventsIntermediate, pumpEventsCurrent,
+        blendEvents
+      ] = await Promise.all([
+        // Coinflip events from old package
         suiClient.queryEvents({
-          query: {
-            MoveEventType: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::casino::BetPlaced`
-          },
+          query: { MoveEventType: `${OLD_PACKAGE_ID}::casino::BetPlaced` },
           limit: 100,
           order: 'descending'
         }),
-        // Revolver events (SpinEvent)
+        // Coinflip events from intermediate package
         suiClient.queryEvents({
-          query: {
-            MoveEventType: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::revolver::SpinEvent`
-          },
+          query: { MoveEventType: `${INTERMEDIATE_PACKAGE_ID}::casino::BetPlaced` },
           limit: 100,
           order: 'descending'
         }),
-        // Crash events (CrashEvent)
+        // Coinflip events from current package
         suiClient.queryEvents({
-          query: {
-            MoveEventType: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::crash::CrashEvent`
-          },
+          query: { MoveEventType: `${CURRENT_PACKAGE_ID}::casino::BetPlaced` },
+          limit: 100,
+          order: 'descending'
+        }),
+        // Revolver events from old package
+        suiClient.queryEvents({
+          query: { MoveEventType: `${OLD_PACKAGE_ID}::revolver::SpinEvent` },
+          limit: 100,
+          order: 'descending'
+        }),
+        // Revolver events from intermediate package
+        suiClient.queryEvents({
+          query: { MoveEventType: `${INTERMEDIATE_PACKAGE_ID}::revolver::SpinEvent` },
+          limit: 100,
+          order: 'descending'
+        }),
+        // Revolver events from current package
+        suiClient.queryEvents({
+          query: { MoveEventType: `${CURRENT_PACKAGE_ID}::revolver::SpinEvent` },
+          limit: 100,
+          order: 'descending'
+        }),
+        // Crash events from old package
+        suiClient.queryEvents({
+          query: { MoveEventType: `${OLD_PACKAGE_ID}::crash::CrashEvent` },
+          limit: 100,
+          order: 'descending'
+        }),
+        // Crash events from intermediate package
+        suiClient.queryEvents({
+          query: { MoveEventType: `${INTERMEDIATE_PACKAGE_ID}::crash::CrashEvent` },
+          limit: 100,
+          order: 'descending'
+        }),
+        // Crash events from current package
+        suiClient.queryEvents({
+          query: { MoveEventType: `${CURRENT_PACKAGE_ID}::crash::CrashEvent` },
+          limit: 100,
+          order: 'descending'
+        }),
+        // Pump events from intermediate package
+        suiClient.queryEvents({
+          query: { MoveEventType: `${INTERMEDIATE_PACKAGE_ID}::pump::PumpEvent` },
+          limit: 100,
+          order: 'descending'
+        }),
+        // Pump events from current package
+        suiClient.queryEvents({
+          query: { MoveEventType: `${CURRENT_PACKAGE_ID}::pump::PumpEvent` },
+          limit: 100,
+          order: 'descending'
+        }),
+        // Blend events (only in new package)
+        suiClient.queryEvents({
+          query: { MoveEventType: `${CURRENT_PACKAGE_ID}::blend::BlendEvent` },
           limit: 100,
           order: 'descending'
         })
       ]);
+
+      // Combine events from all packages
+      const coinflipEvents = { data: [...(coinflipEventsOld.data || []), ...(coinflipEventsIntermediate.data || []), ...(coinflipEventsCurrent.data || [])] };
+      const revolverEvents = { data: [...(revolverEventsOld.data || []), ...(revolverEventsIntermediate.data || []), ...(revolverEventsCurrent.data || [])] };
+      const crashEvents = { data: [...(crashEventsOld.data || []), ...(crashEventsIntermediate.data || []), ...(crashEventsCurrent.data || [])] };
+      const pumpEvents = { data: [...(pumpEventsIntermediate.data || []), ...(pumpEventsCurrent.data || [])] };
+      const blendEventsData = { data: blendEvents.data || [] };
 
       // Process coinflip events
       const coinflipBets = coinflipEvents.data.map(event => ({
@@ -116,8 +182,34 @@ export default function Play() {
         blockHeight: event.id.eventSeq ? parseInt(event.id.eventSeq) : undefined
       }));
 
+      // Process pump events
+      const pumpBets = pumpEvents.data.map(event => ({
+        digest: event.id.txDigest,
+        timestamp: parseInt(event.timestampMs || '0'),
+        player: (event.parsedJson as any).player,
+        amount: parseInt((event.parsedJson as any).stake) / 1_000_000_000,
+        isWinner: (event.parsedJson as any).win,
+        payout: parseInt((event.parsedJson as any).payout) / 1_000_000_000,
+        randomValue: parseInt((event.parsedJson as any).market_direction || '0'),
+        game: 'Pump',
+        blockHeight: event.id.eventSeq ? parseInt(event.id.eventSeq) : undefined
+      }));
+
+      // Process blend events
+      const blendBets = blendEventsData.data.map(event => ({
+        digest: event.id.txDigest,
+        timestamp: parseInt(event.timestampMs || '0'),
+        player: (event.parsedJson as any).player,
+        amount: parseInt((event.parsedJson as any).stake) / 1_000_000_000,
+        isWinner: (event.parsedJson as any).win,
+        payout: parseInt((event.parsedJson as any).payout) / 1_000_000_000,
+        randomValue: parseInt((event.parsedJson as any).ladder_position || '0'),
+        game: 'Blend',
+        blockHeight: event.id.eventSeq ? parseInt(event.id.eventSeq) : undefined
+      }));
+
       // Combine and sort all bets by timestamp
-      const allBetsData = [...coinflipBets, ...revolverBets, ...crashBets]
+      const allBetsData = [...coinflipBets, ...revolverBets, ...crashBets, ...pumpBets, ...blendBets]
         .sort((a, b) => b.timestamp - a.timestamp);
 
       setAllBets(allBetsData);
@@ -343,7 +435,7 @@ export default function Play() {
                                     {bet.game}
                                   </span>
                                 )}
-                                {bet.game === 'Coinflip' ? 'Random' : bet.game === 'Revolver' ? 'Angle' : bet.game === 'Crash' ? 'Crash' : 'Value'}: {bet.randomValue}
+                                {bet.game === 'Coinflip' ? 'Random' : bet.game === 'Revolver' ? 'Angle' : bet.game === 'Crash' ? 'Crash' : bet.game === 'Pump' ? 'Direction' : bet.game === 'Blend' ? 'Ladder' : 'Value'}: {bet.randomValue}
                                 {bet.game === 'Revolver' && '°'} 
                                 {bet.game === 'Crash' && 'x'} | TX: 
                                 <a 
@@ -398,7 +490,7 @@ export default function Play() {
                                     {bet.game}
                                   </span>
                                 )}
-                                {bet.game === 'Coinflip' ? 'Random' : bet.game === 'Revolver' ? 'Angle' : bet.game === 'Crash' ? 'Crash' : 'Value'}: {bet.randomValue}
+                                {bet.game === 'Coinflip' ? 'Random' : bet.game === 'Revolver' ? 'Angle' : bet.game === 'Crash' ? 'Crash' : bet.game === 'Pump' ? 'Direction' : bet.game === 'Blend' ? 'Ladder' : 'Value'}: {bet.randomValue}
                                 {bet.game === 'Revolver' && '°'} 
                                 {bet.game === 'Crash' && 'x'} | TX: 
                                 <a 
