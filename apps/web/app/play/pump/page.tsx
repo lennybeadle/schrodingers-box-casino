@@ -134,13 +134,25 @@ export default function PumpPage() {
 
       // Create transaction
       const txb = new Transaction();
-      txb.setGasBudget(10_000_000); // 0.01 SUI gas budget
+      txb.setGasBudget(100_000_000); // 0.1 SUI gas budget - increased for network fee estimation
+      
+      // Ensure threshold is valid u8 (1-98)
+      const validThreshold = Math.min(Math.max(Math.floor(threshold), 1), 98);
+      
+      console.log('Creating pump transaction:', {
+        packageId: PACKAGE_ID,
+        houseId: HOUSE_OBJECT_ID,
+        threshold: validThreshold,
+        amountMist,
+        amountSui
+      });
+      
       const [coin] = txb.splitCoins(txb.gas, [amountMist]);
 
       txb.moveCall({
         target: `${PACKAGE_ID}::pump::play_pump_or_dump`,
         arguments: [
-          txb.pure.u8(threshold),
+          txb.pure.u8(validThreshold),
           coin,
           txb.object('0x8'), // Random object
           txb.object(HOUSE_OBJECT_ID),
@@ -236,9 +248,24 @@ export default function PumpPage() {
 
     } catch (error: any) {
       console.error('Play failed:', error);
+      
+      let errorMessage = 'Transaction failed';
+      
+      if (error.message) {
+        if (error.message.includes('Insufficient gas')) {
+          errorMessage = 'Insufficient gas for transaction. Please ensure you have enough SUI for gas fees.';
+        } else if (error.message.includes('GasBalanceTooLow') || error.message.includes('gas')) {
+          errorMessage = 'Network fee error: Not enough SUI for gas. Try reducing bet amount or add more SUI to wallet.';
+        } else if (error.message.includes('User rejected') || error.message.includes('cancelled')) {
+          errorMessage = 'Transaction cancelled by user';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       setLastResult({
         success: false,
-        message: error.message || 'Transaction failed'
+        message: errorMessage
       });
       setIsPlaying(false);
     }
