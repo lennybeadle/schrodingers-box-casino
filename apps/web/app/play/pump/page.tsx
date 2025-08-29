@@ -134,6 +134,7 @@ export default function PumpPage() {
 
       // Create transaction
       const txb = new Transaction();
+      txb.setGasBudget(10_000_000); // 0.01 SUI gas budget
       const [coin] = txb.splitCoins(txb.gas, [amountMist]);
 
       txb.moveCall({
@@ -220,6 +221,9 @@ export default function PumpPage() {
       };
 
       setLastResult(gameResult);
+      
+      // Update house balance
+      checkHouseBalance();
 
       // Show appropriate image after a delay
       setTimeout(() => {
@@ -416,6 +420,16 @@ export default function PumpPage() {
                     isPlaying={isPlaying}
                     gameName="Pump or Dump"
                   />
+
+                  {/* House Balance */}
+                  <div className="text-center py-4 border-t border-gray-100 dark:border-gray-700">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">
+                      House Balance
+                    </div>
+                    <div className={`text-xl font-mono ${houseBalance > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                      {houseBalance.toFixed(3)} SUI
+                    </div>
+                  </div>
 
                   {/* Threshold Slider */}
                   <div className="space-y-4">
