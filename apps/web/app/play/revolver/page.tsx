@@ -444,7 +444,7 @@ export default function RevolverPage() {
                       isSpinning={isSpinning}
                       finalAngle={lastResult?.angle || 0}
                       imageUrl={process.env.NEXT_PUBLIC_IMAGE_REVOLVER || "https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/revolver.webp"}
-                      showLossImage={lastResult && !lastResult.isWinner && showLossImage}
+                      showLossImage={!!(lastResult && !lastResult.isWinner && showLossImage)}
                     />
                   </div>
                   
