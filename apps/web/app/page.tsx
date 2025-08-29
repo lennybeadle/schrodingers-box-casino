@@ -4,11 +4,10 @@ import Link from 'next/link';
 import { SuiWalletButton } from '@/components/SuiWalletButton';
 import { GameNavigation } from '@/components/GameNavigation';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { useGameUnlocks } from '@/hooks/useGameUnlocks';
+import { GameCarousel } from '@/components/GameCarousel';
 
 export default function Home() {
   const NETWORK = process.env.NEXT_PUBLIC_SUI_NETWORK || 'testnet';
-  const { unlocks, getProgressToUnlock, loading: unlocksLoading } = useGameUnlocks();
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 relative transition-colors duration-300">
@@ -87,6 +86,12 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Game Carousel */}
+              <div className="py-8">
+                <GameCarousel />
+              </div>
+
+              {/* Legacy Grid View - Hidden 
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
                 <Link 
                   href="/play/coinflip"
@@ -230,6 +235,7 @@ export default function Home() {
                   </div>
                 )}
               </div>
+              */}
             </div>
           </div>
         </div>
