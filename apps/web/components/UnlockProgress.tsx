@@ -3,7 +3,7 @@
 import { useGameUnlocks } from '@/hooks/useGameUnlocks';
 
 interface UnlockProgressProps {
-  showNextUnlock?: 'crash' | 'revolver';
+  showNextUnlock?: 'crash' | 'revolver' | 'pump';
 }
 
 export function UnlockProgress({ showNextUnlock }: UnlockProgressProps) {
@@ -12,7 +12,7 @@ export function UnlockProgress({ showNextUnlock }: UnlockProgressProps) {
   if (loading) return null;
 
   // If no specific unlock to show, auto-determine next unlock
-  const nextToUnlock = showNextUnlock || (!unlocks.crash ? 'crash' : !unlocks.revolver ? 'revolver' : null);
+  const nextToUnlock = showNextUnlock || (!unlocks.crash ? 'crash' : !unlocks.revolver ? 'revolver' : !unlocks.pump ? 'pump' : null);
   
   if (!nextToUnlock || unlocks[nextToUnlock]) return null;
 
@@ -21,12 +21,14 @@ export function UnlockProgress({ showNextUnlock }: UnlockProgressProps) {
   
   const gameNames = {
     crash: 'Cat Crash',
-    revolver: 'Revolver Roulette'
+    revolver: 'Revolver Roulette',
+    pump: 'Pump or Dump'
   };
 
   const prereqNames = {
     crash: 'coinflip',
-    revolver: 'crash'
+    revolver: 'crash',
+    pump: 'revolver'
   };
 
   return (

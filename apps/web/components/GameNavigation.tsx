@@ -14,6 +14,7 @@ const games: Game[] = [
   { path: '/play/coinflip', name: 'Coin Flip', icon: '🪙' },
   { path: '/play/crash', name: 'Cat Crash', icon: '🏍️' },
   { path: '/play/revolver', name: 'Revolver', icon: '🔫' },
+  { path: '/play/pump', name: 'Pump/Dump', icon: '📈' },
 ];
 
 export function GameNavigation() {
@@ -32,6 +33,7 @@ export function GameNavigation() {
     if (path === '/play/coinflip') return true;
     if (path === '/play/crash') return unlocks.crash;
     if (path === '/play/revolver') return unlocks.revolver;
+    if (path === '/play/pump') return unlocks.pump || false; // Default to locked for now
     return false;
   };
   

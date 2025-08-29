@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useGameUnlocks } from '@/hooks/useGameUnlocks';
 
 interface GameLockedOverlayProps {
-  game: 'crash' | 'revolver';
+  game: 'crash' | 'revolver' | 'pump';
   gameTitle: string;
   unlockMessage: string;
 }
@@ -29,8 +29,8 @@ export function GameLockedOverlay({ game, gameTitle, unlockMessage }: GameLocked
   }
 
   const progress = getProgressToUnlock(game);
-  const prerequisiteGame = game === 'crash' ? 'coinflip' : 'crash';
-  const prerequisiteGameTitle = game === 'crash' ? 'Caesar\'s CoinFlip' : 'Cat Crash';
+  const prerequisiteGame = game === 'crash' ? 'coinflip' : game === 'revolver' ? 'crash' : 'revolver';
+  const prerequisiteGameTitle = game === 'crash' ? 'Caesar\'s CoinFlip' : game === 'revolver' ? 'Cat Crash' : 'Revolver Roulette';
 
   return (
     <div className="fixed inset-0 z-50 bg-gray-900/80 backdrop-blur-md flex items-center justify-center">
@@ -77,7 +77,7 @@ export function GameLockedOverlay({ game, gameTitle, unlockMessage }: GameLocked
         {/* Action Buttons */}
         <div className="space-y-3">
           <Link
-            href={game === 'crash' ? "/play/coinflip" : "/play/crash"}
+            href={game === 'crash' ? "/play/coinflip" : game === 'revolver' ? "/play/crash" : "/play/revolver"}
             className="block w-full py-3 bg-gradient-to-r from-czar-gold via-caesar-gold to-czar-bronze text-black font-semibold rounded-lg hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
           >
             Play {prerequisiteGameTitle}

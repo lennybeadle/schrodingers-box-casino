@@ -9,6 +9,7 @@ import { BettingPanel } from '@/components/BettingPanel';
 import { GameNavigation } from '@/components/GameNavigation';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { GameLockedOverlay } from '@/components/GameLockedOverlay';
+import { UnlockProgress } from '@/components/UnlockProgress';
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 
@@ -475,6 +476,11 @@ export default function RevolverPage() {
                     isPlaying={isSpinning}
                     gameName="Revolver Roulette"
                   />
+
+                  {/* Unlock Progress */}
+                  <div className="py-4">
+                    <UnlockProgress showNextUnlock="pump" />
+                  </div>
                   
                   {/* House Balance */}
                   <div className="text-center py-4 border-t border-gray-100 dark:border-gray-700">

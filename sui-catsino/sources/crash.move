@@ -45,8 +45,8 @@ module catsino::crash {
     /// where U is uniform random in [1, 2^64-1] and SCALE = 2^64
     fun generate_crash_multiplier(rng: &mut random::RandomGenerator): u64 {
         // Simplified crash multiplier generation
-        // Generate random number 1-10000 to get probabilities
-        let random_roll = random::generate_u64_in_range(rng, 1, 10000);
+        // Generate random number 0-9999 then add 1 to get 1-10000
+        let random_roll = random::generate_u64_in_range(rng, 0, 9999) + 1;
         
         // Simple crash distribution - most games crash low, few go high
         if (random_roll <= 5000) {
