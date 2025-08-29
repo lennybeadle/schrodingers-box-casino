@@ -7,6 +7,9 @@ interface BettingPanelProps {
   isPlaying: boolean;
   minBet?: number;
   gameName: string;
+  targetMultiplier?: number;
+  setTargetMultiplier?: (target: number) => void;
+  showTargetMultiplier?: boolean;
 }
 
 export function BettingPanel({
@@ -16,31 +19,65 @@ export function BettingPanel({
   isPlaying,
   minBet = 0.1,
   gameName,
+  targetMultiplier,
+  setTargetMultiplier,
+  showTargetMultiplier = false,
 }: BettingPanelProps) {
   const chips = ['0.1', '0.5', '1.0', '5.0'];
+  const targetMultipliers = [120, 200, 300, 500]; // 1.2x, 2.0x, 3.0x, 5.0x
 
   return (
     <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm space-y-4 transition-colors duration-300">
       <div className="space-y-3">
         <h3 className="text-lg font-light text-gray-900 dark:text-gray-100 text-center">{gameName}</h3>
         
-        {/* Chip Selection - More Compact */}
-        <div className="grid grid-cols-4 gap-2">
-          {chips.map((amount) => (
-            <button
-              key={amount}
-              onClick={() => setBetAmount(amount)}
-              disabled={isPlaying}
-              className={`px-2 py-1.5 rounded-md transition-all text-xs font-mono ${
-                betAmount === amount
-                  ? 'bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-600 dark:to-slate-700 text-white shadow-md ring-1 ring-slate-400/50'
-                  : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm'
-              } disabled:opacity-50`}
-            >
-              {amount}
-            </button>
-          ))}
+        {/* Bet Amount Selection */}
+        <div className="space-y-2">
+          <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+            Bet Amount (SUI)
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {chips.map((amount) => (
+              <button
+                key={amount}
+                onClick={() => setBetAmount(amount)}
+                disabled={isPlaying}
+                className={`px-2 py-1.5 rounded-md transition-all text-xs font-mono ${
+                  betAmount === amount
+                    ? 'bg-gradient-to-r from-red-600 to-red-700 dark:from-red-500 dark:to-red-600 text-white shadow-md ring-1 ring-red-400/50'
+                    : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm'
+                } disabled:opacity-50`}
+              >
+                {amount}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* Target Multiplier Selection - Only for crash game */}
+        {showTargetMultiplier && targetMultiplier && setTargetMultiplier && (
+          <div className="space-y-2">
+            <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+              Target Multiplier
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {targetMultipliers.map((target) => (
+                <button
+                  key={target}
+                  onClick={() => setTargetMultiplier(target)}
+                  disabled={isPlaying}
+                  className={`px-2 py-1.5 rounded-md transition-all text-xs font-mono ${
+                    targetMultiplier === target
+                      ? 'bg-gradient-to-r from-red-600 to-red-700 dark:from-red-500 dark:to-red-600 text-white shadow-md ring-1 ring-red-400/50'
+                      : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm'
+                  } disabled:opacity-50`}
+                >
+                  {(target / 100).toFixed(1)}x
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Custom Amount Input - Smaller */}
         <div className="relative">

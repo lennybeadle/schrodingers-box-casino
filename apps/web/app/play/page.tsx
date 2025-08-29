@@ -15,6 +15,7 @@ interface BetHistory {
   isWinner: boolean;
   payout: number;
   randomValue: number;
+  game?: string;
   blockHeight?: number;
 }
 
@@ -48,16 +49,36 @@ export default function Play() {
     try {
       setLoading(true);
       
-      // Fetch all bet data
-      const events = await suiClient.queryEvents({
-        query: {
-          MoveEventType: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::casino::BetPlaced`
-        },
-        limit: 100,
-        order: 'descending'
-      });
+      // Fetch all three types of game events
+      const [coinflipEvents, revolverEvents, crashEvents] = await Promise.all([
+        // Coinflip events (BetPlaced)
+        suiClient.queryEvents({
+          query: {
+            MoveEventType: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::casino::BetPlaced`
+          },
+          limit: 100,
+          order: 'descending'
+        }),
+        // Revolver events (SpinEvent)
+        suiClient.queryEvents({
+          query: {
+            MoveEventType: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::revolver::SpinEvent`
+          },
+          limit: 100,
+          order: 'descending'
+        }),
+        // Crash events (CrashEvent)
+        suiClient.queryEvents({
+          query: {
+            MoveEventType: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::crash::CrashEvent`
+          },
+          limit: 100,
+          order: 'descending'
+        })
+      ]);
 
-      const allBetsData = events.data.map(event => ({
+      // Process coinflip events
+      const coinflipBets = coinflipEvents.data.map(event => ({
         digest: event.id.txDigest,
         timestamp: parseInt(event.timestampMs || '0'),
         player: (event.parsedJson as any).player,
@@ -65,8 +86,39 @@ export default function Play() {
         isWinner: (event.parsedJson as any).is_winner,
         payout: parseInt((event.parsedJson as any).payout) / 1_000_000_000,
         randomValue: parseInt((event.parsedJson as any).random_value),
+        game: 'Coinflip',
         blockHeight: event.id.eventSeq ? parseInt(event.id.eventSeq) : undefined
       }));
+
+      // Process revolver events
+      const revolverBets = revolverEvents.data.map(event => ({
+        digest: event.id.txDigest,
+        timestamp: parseInt(event.timestampMs || '0'),
+        player: (event.parsedJson as any).player,
+        amount: parseInt((event.parsedJson as any).stake) / 1_000_000_000,
+        isWinner: (event.parsedJson as any).win,
+        payout: parseInt((event.parsedJson as any).payout) / 1_000_000_000,
+        randomValue: parseInt((event.parsedJson as any).angle_deg),
+        game: 'Revolver',
+        blockHeight: event.id.eventSeq ? parseInt(event.id.eventSeq) : undefined
+      }));
+
+      // Process crash events
+      const crashBets = crashEvents.data.map(event => ({
+        digest: event.id.txDigest,
+        timestamp: parseInt(event.timestampMs || '0'),
+        player: (event.parsedJson as any).player,
+        amount: parseInt((event.parsedJson as any).stake) / 1_000_000_000,
+        isWinner: (event.parsedJson as any).win,
+        payout: parseInt((event.parsedJson as any).payout) / 1_000_000_000,
+        randomValue: parseInt((event.parsedJson as any).crash_x100),
+        game: 'Crash',
+        blockHeight: event.id.eventSeq ? parseInt(event.id.eventSeq) : undefined
+      }));
+
+      // Combine and sort all bets by timestamp
+      const allBetsData = [...coinflipBets, ...revolverBets, ...crashBets]
+        .sort((a, b) => b.timestamp - a.timestamp);
 
       setAllBets(allBetsData);
       setPlayerBets(allBetsData.filter(bet => bet.player === currentAccount.address));
@@ -285,8 +337,24 @@ export default function Play() {
                                 </div>
                                 <div className="text-sm text-gray-500">{formatTime(bet.timestamp)}</div>
                               </div>
-                              <div className="text-xs text-gray-400 font-mono">
-                                Random: {bet.randomValue} | TX: {bet.digest.slice(0, 16)}...
+                              <div className="text-xs text-gray-400 dark:text-gray-500 font-mono">
+                                {bet.game && (
+                                  <span className="inline-block bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded text-xs mr-2">
+                                    {bet.game}
+                                  </span>
+                                )}
+                                {bet.game === 'Coinflip' ? 'Random' : bet.game === 'Revolver' ? 'Angle' : bet.game === 'Crash' ? 'Crash' : 'Value'}: {bet.randomValue}
+                                {bet.game === 'Revolver' && '°'} 
+                                {bet.game === 'Crash' && 'x'} | TX: 
+                                <a 
+                                  href={`https://suiexplorer.com/txblock/${bet.digest}?network=${process.env.NEXT_PUBLIC_SUI_NETWORK || 'mainnet'}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-czar-gold hover:underline"
+                                  title="View on Sui Explorer"
+                                >
+                                  {bet.digest.slice(0, 16)}...
+                                </a>
                               </div>
                             </div>
                           ))}
@@ -324,8 +392,24 @@ export default function Play() {
                                 </div>
                                 <div className="text-sm text-gray-500">{formatTime(bet.timestamp)}</div>
                               </div>
-                              <div className="text-xs text-gray-400 font-mono">
-                                Random: {bet.randomValue} | TX: {bet.digest.slice(0, 16)}...
+                              <div className="text-xs text-gray-400 dark:text-gray-500 font-mono">
+                                {bet.game && (
+                                  <span className="inline-block bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded text-xs mr-2">
+                                    {bet.game}
+                                  </span>
+                                )}
+                                {bet.game === 'Coinflip' ? 'Random' : bet.game === 'Revolver' ? 'Angle' : bet.game === 'Crash' ? 'Crash' : 'Value'}: {bet.randomValue}
+                                {bet.game === 'Revolver' && '°'} 
+                                {bet.game === 'Crash' && 'x'} | TX: 
+                                <a 
+                                  href={`https://suiexplorer.com/txblock/${bet.digest}?network=${process.env.NEXT_PUBLIC_SUI_NETWORK || 'mainnet'}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-czar-gold hover:underline"
+                                  title="View on Sui Explorer"
+                                >
+                                  {bet.digest.slice(0, 16)}...
+                                </a>
                               </div>
                             </div>
                           ))}

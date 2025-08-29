@@ -1,6 +1,9 @@
 import './globals.css';
 import { SuiWalletProvider } from './providers/SuiWalletProvider';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { NotificationProvider } from '@/contexts/NotificationContext';
+import { SnackbarContainer } from '@/components/Snackbar';
+import { BlockchainEventListener } from '@/components/BlockchainEventListener';
 
 export const metadata = {
   title: "CatsinoFun - Purr-fect Casino Games on Sui",
@@ -25,9 +28,13 @@ export default function RootLayout({
       </head>
       <body className="bg-white dark:bg-gray-900 min-h-screen font-space text-caesar-black dark:text-gray-100 antialiased transition-colors duration-300">
         <ThemeProvider>
-          <SuiWalletProvider>
-            {children}
-          </SuiWalletProvider>
+          <NotificationProvider>
+            <SuiWalletProvider>
+              {children}
+              <SnackbarContainer />
+              <BlockchainEventListener />
+            </SuiWalletProvider>
+          </NotificationProvider>
         </ThemeProvider>
       </body>
     </html>

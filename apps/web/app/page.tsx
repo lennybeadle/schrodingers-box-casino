@@ -93,10 +93,10 @@ export default function Home() {
                   <div className="text-center space-y-3">
                     <img 
                       src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/tails.webp"
-                      alt="CatFlip" 
+                      alt="Caesar's" 
                       className="w-20 h-20 mx-auto rounded-full"
                     />
-                    <h3 className="text-lg font-light text-gray-900 dark:text-gray-100">CatFlip CoinFlip</h3>
+                    <h3 className="text-lg font-light text-gray-900 dark:text-gray-100">Caesar's CoinFlip</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-300">Classic coin flip • 1.96x payout</p>
                     <div className="text-xs text-gray-400 dark:text-gray-500">Click to play →</div>
                   </div>
@@ -144,8 +144,17 @@ export default function Home() {
             <div className="w-16 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent mx-auto"></div>
             
             <p className="text-xs text-gray-400 dark:text-gray-500 font-mono tracking-wider">
-              CatsinoFun • Premium Sui Casino • Ultra-low fees
+              Provably-Fair • On-Chain Sui Casino • Ultra-low fees
             </p>
+            
+            <div className="flex items-center justify-center gap-2 text-xs mb-4">
+              <Link 
+                href="/play" 
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-300 underline decoration-dotted underline-offset-4"
+              >
+                Advanced Interface
+              </Link>
+            </div>
             
             <div className="flex items-center justify-center gap-6 text-xs">
               <a 

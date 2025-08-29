@@ -32,6 +32,7 @@ export default function RevolverPage() {
     isWinner?: boolean;
     payout?: number;
   } | null>(null);
+  const [showLossImage, setShowLossImage] = useState(false);
   const [houseBalance, setHouseBalance] = useState<number>(0);
   const [isFunding, setIsFunding] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
@@ -189,8 +190,8 @@ export default function RevolverPage() {
   const handleSpin = async () => {
     if (!currentAccount) return;
     
-    setIsSpinning(true);
     setLastResult(null);
+    setShowLossImage(false);
     
     try {
       console.log('Starting spin...');
@@ -241,6 +242,8 @@ export default function RevolverPage() {
           {
             onSuccess: (data) => {
               console.log('Transaction successful:', data);
+              // Start the spin animation only after transaction confirmation
+              setIsSpinning(true);
               resolve(data);
             },
             onError: (error) => {
@@ -317,7 +320,15 @@ export default function RevolverPage() {
       setTimeout(() => {
         setLastResult(spinResult);
         setIsSpinning(false);
+        setShowLossImage(false); // Reset loss image state
         checkHouseBalance(); // Refresh house balance
+        
+        // If it's a loss, show revolver_loss.webp after 2 seconds
+        if (!isWinner) {
+          setTimeout(() => {
+            setShowLossImage(true);
+          }, 2000);
+        }
       }, 3000);
       
     } catch (error: any) {
@@ -426,6 +437,7 @@ export default function RevolverPage() {
                       isSpinning={isSpinning}
                       finalAngle={lastResult?.angle || 0}
                       imageUrl={process.env.NEXT_PUBLIC_IMAGE_REVOLVER || "https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/revolver.webp"}
+                      showLossImage={lastResult && !lastResult.isWinner && showLossImage}
                     />
                   </div>
                   

@@ -49,8 +49,11 @@ export function Motorcycle({ isAnimating, crashed, crashMultiplier }: Motorcycle
           : ''
       }`}>
         <img
-          src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/motorcycle.webp"
-          alt="Crash Motorcycle"
+          src={crashed 
+            ? "https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/motorcycle_crash.webp"
+            : "https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/motorcycle.webp"
+          }
+          alt={crashed ? "Crashed Motorcycle" : "Crash Motorcycle"}
           className={`w-48 h-48 object-contain ${
             animationPhase === 'jittering' ? 'jitter-animation' : ''
           }`}
@@ -129,17 +132,33 @@ export function Motorcycle({ isAnimating, crashed, crashMultiplier }: Motorcycle
         }
 
         .racing-lines {
-          background: linear-gradient(
-            90deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.3) 25%,
-            rgba(255, 255, 255, 0.6) 50%,
-            rgba(255, 255, 255, 0.3) 75%,
-            transparent 100%
-          );
           width: 200%;
           height: 100%;
           animation: race 0.3s infinite linear;
+        }
+        
+        /* Light mode - white lines */
+        :global(.racing-lines) {
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.4) 25%,
+            rgba(255, 255, 255, 0.8) 50%,
+            rgba(255, 255, 255, 0.4) 75%,
+            transparent 100%
+          );
+        }
+        
+        /* Dark mode - gray lines */
+        :global(.dark .racing-lines) {
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(75, 85, 99, 0.3) 25%,
+            rgba(75, 85, 99, 0.6) 50%,
+            rgba(75, 85, 99, 0.3) 75%,
+            transparent 100%
+          ) !important;
         }
 
         @keyframes race {

@@ -23,6 +23,7 @@ export default function Home() {
   const [betAmount, setBetAmount] = useState<string>('0.1');
   const [isPlaying, setIsPlaying] = useState(false);
   const [lastResult, setLastResult] = useState<{ success: boolean; message: string; txUrl?: string; isWinner?: boolean } | null>(null);
+  const [showLossImage, setShowLossImage] = useState(false);
   const [isFunding, setIsFunding] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState<string>('0.1');
@@ -205,8 +206,8 @@ export default function Home() {
       return;
     }
 
-    setIsPlaying(true);
     setLastResult(null);
+    setShowLossImage(false);
 
     try {
       const amountSui = parseFloat(betAmount);
@@ -251,6 +252,8 @@ export default function Home() {
           {
             onSuccess: (data) => {
               console.log('Transaction successful:', data);
+              // Start the flip animation only after transaction confirmation
+              setIsPlaying(true);
               resolve(data);
             },
             onError: (error) => {
@@ -344,6 +347,14 @@ export default function Home() {
       setTimeout(() => {
         setLastResult(betResult);
         setIsPlaying(false);
+        setShowLossImage(false); // Reset loss image state
+        
+        // If it's a loss, show tails_loss.webp after 2 seconds
+        if (!isWinner) {
+          setTimeout(() => {
+            setShowLossImage(true);
+          }, 2000);
+        }
       }, 3000);
       
     } catch (error: any) {
@@ -410,7 +421,7 @@ export default function Home() {
                 <div className="relative">
                   <img 
                     src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/tails.webp" 
-                    alt="CatFlip Tails" 
+                    alt="Caesar's Tails" 
                     className="w-80 h-80 mx-auto animate-caesar-float filter drop-shadow-2xl opacity-90" 
                   />
                 </div>
@@ -419,7 +430,7 @@ export default function Home() {
               <div className="space-y-12">
                 <div className="space-y-6">
                   <h1 className="text-6xl font-thin text-gray-900 dark:text-gray-100 tracking-tight leading-tight">
-                    CatFlip <span className="bg-gradient-to-r from-czar-gold via-caesar-gold to-czar-bronze bg-clip-text text-transparent">CoinFlip</span>
+                    Caesar's <span className="bg-gradient-to-r from-czar-gold via-caesar-gold to-czar-bronze bg-clip-text text-transparent">CoinFlip</span>
                   </h1>
                   
                   <div className="w-24 h-px bg-gradient-to-r from-transparent via-czar-gold to-transparent mx-auto"></div>
@@ -449,49 +460,70 @@ export default function Home() {
                   <div className="relative">
                     <div className="absolute inset-0 bg-gradient-to-r from-caesar-gold/10 via-caesar-cream/5 to-czar-bronze/10 rounded-full blur-3xl animate-pulse"></div>
                     
-                    {/* Coin Flip Animation */}
-                    <div className="relative w-72 h-72 mx-auto" style={{ perspective: '1000px' }}>
-                      <div 
-                        className={`w-full h-full relative transition-all duration-1000 ${isPlaying ? 'animate-coin-flip' : 'animate-caesar-float'}`} 
-                        style={{ 
-                          transformStyle: 'preserve-3d',
-                          transform: !isPlaying && lastResult !== null 
-                            ? (lastResult.success && lastResult.message.includes('won') ? 'rotateX(0deg)' : 'rotateX(180deg)')
-                            : 'rotateX(0deg)'
-                        }}
-                      >
-                        
-                        {/* Heads Side */}
-                        <div className="absolute inset-0 w-full h-full backface-hidden" style={{ backfaceVisibility: 'hidden' }}>
-                          <img 
-                            src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/heads.webp" 
-                            alt="Coin Heads" 
-                            className={`w-full h-full object-contain filter drop-shadow-2xl ${
-                              lastResult !== null 
-                                ? lastResult.success && lastResult.message.includes('won')
-                                  ? 'filter brightness-110 saturate-150' 
-                                  : 'filter grayscale brightness-75'
-                                : ''
-                            }`}
-                          />
+                    {/* Coin Display */}
+                    <div className="relative w-72 h-72 mx-auto">
+                      {!lastResult || isPlaying ? (
+                        /* Default/Loading State - Show spinning animation */
+                        <div className="relative w-full h-full" style={{ perspective: '1000px' }}>
+                          <div 
+                            className={`w-full h-full relative ${isPlaying ? 'animate-coin-flip' : 'animate-caesar-float'}`}
+                            style={{ 
+                              transformStyle: 'preserve-3d'
+                            }}
+                          >
+                            {/* Heads Side */}
+                            <div className="absolute inset-0 w-full h-full" style={{ backfaceVisibility: 'hidden' }}>
+                              <img 
+                                src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/heads.webp" 
+                                alt="Coin Heads" 
+                                className="w-full h-full object-contain filter drop-shadow-2xl"
+                              />
+                            </div>
+                            
+                            {/* Tails Side */}
+                            <div className="absolute inset-0 w-full h-full" style={{ backfaceVisibility: 'hidden', transform: 'rotateX(180deg)' }}>
+                              <img 
+                                src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/tails.webp" 
+                                alt="Coin Tails" 
+                                className="w-full h-full object-contain filter drop-shadow-2xl"
+                              />
+                            </div>
+                          </div>
                         </div>
-                        
-                        {/* Tails Side */}
-                        <div className="absolute inset-0 w-full h-full backface-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateX(180deg)' }}>
-                          <img 
-                            src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/tails.webp" 
-                            alt="Coin Tails" 
-                            className={`w-full h-full object-contain filter drop-shadow-2xl ${
-                              lastResult !== null 
-                                ? lastResult.success && lastResult.message.includes('won')
-                                  ? 'filter brightness-110 saturate-150' 
-                                  : 'filter grayscale brightness-75'
-                                : ''
-                            }`}
-                          />
+                      ) : (
+                        /* Result State - Show correct image based on win/loss with crossfade */
+                        <div className="w-full h-full relative animate-caesar-float">
+                          {lastResult.success && lastResult.message.includes('won') ? (
+                            /* Win state - show heads */
+                            <img 
+                              src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/heads.webp"
+                              alt="Heads - You Win!"
+                              className="w-full h-full object-contain filter drop-shadow-2xl filter brightness-110 saturate-150"
+                            />
+                          ) : (
+                            /* Loss state - crossfade between tails and tails_loss */
+                            <>
+                              {/* Normal tails image */}
+                              <img 
+                                src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/tails.webp"
+                                alt="Tails - You Lose"
+                                className={`absolute inset-0 w-full h-full object-contain filter drop-shadow-2xl transition-opacity duration-700 ease-in-out filter grayscale brightness-75 ${
+                                  showLossImage ? 'opacity-0' : 'opacity-100'
+                                }`}
+                              />
+                              
+                              {/* Loss tails image */}
+                              <img 
+                                src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/tails_loss.webp"
+                                alt="Tails Loss - You Lose"
+                                className={`absolute inset-0 w-full h-full object-contain filter drop-shadow-2xl transition-opacity duration-700 ease-in-out filter grayscale brightness-50 contrast-75 ${
+                                  showLossImage ? 'opacity-100' : 'opacity-0'
+                                }`}
+                              />
+                            </>
+                          )}
                         </div>
-                        
-                      </div>
+                      )}
                     </div>
                   </div>
                   
@@ -597,7 +629,7 @@ export default function Home() {
                         {isPlaying ? (
                           <>
                             <div className="w-6 h-6 border border-white/30 border-t-white rounded-full animate-spin"></div>
-                            QUANTUM PROCESSING
+                            DECIDING FATE
                           </>
                         ) : (
                           <>

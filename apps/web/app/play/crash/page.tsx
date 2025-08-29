@@ -8,6 +8,7 @@ import { BettingPanel } from '@/components/BettingPanel';
 import { GameNavigation } from '@/components/GameNavigation';
 import { Motorcycle } from '@/components/Motorcycle';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { Dialog } from '@/components/Dialog';
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 
@@ -37,12 +38,22 @@ export default function CrashPage() {
     isWinner?: boolean;
     payout?: number;
   } | null>(null);
+  const [gameResult, setGameResult] = useState<{ 
+    crashed: boolean; 
+    crashMultiplier: number; 
+  } | null>(null);
   const [houseBalance, setHouseBalance] = useState<number>(0);
   const [isFunding, setIsFunding] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState<string>('0.1');
   const [passcode, setPasscode] = useState<string>('');
   const [showPasscodeModal, setShowPasscodeModal] = useState(false);
+  const [dialog, setDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'error' | 'warning' | 'info' | 'success';
+  }>({ isOpen: false, title: '', message: '', type: 'info' });
   const [gameHistory, setGameHistory] = useState<Array<{
     stake: number;
     target: number;
@@ -372,7 +383,12 @@ export default function CrashPage() {
 
     const correctPasscode = process.env.NEXT_PUBLIC_ADMIN_PASSCODE || '21563';
     if (passcode !== correctPasscode) {
-      alert('❌ Invalid passcode');
+      setDialog({
+        isOpen: true,
+        title: 'Invalid Passcode',
+        message: 'The passcode you entered is incorrect. Please try again.',
+        type: 'error'
+      });
       return;
     }
 
@@ -432,7 +448,12 @@ export default function CrashPage() {
   // Play the crash game
   const handlePlay = async () => {
     if (!currentAccount?.address) {
-      alert('Please connect your Sui wallet first');
+      setDialog({
+        isOpen: true,
+        title: 'Wallet Not Connected',
+        message: 'Please connect your Sui wallet before playing the crash game.',
+        type: 'info'
+      });
       return;
     }
 
@@ -440,12 +461,18 @@ export default function CrashPage() {
     const potentialPayout = calculatePayout(stake, targetMultiplier);
 
     if (potentialPayout > houseBalance * 0.8) {
-      alert('Bet too large for current house balance. Please reduce your bet or target multiplier.');
+      setDialog({
+        isOpen: true,
+        title: 'Bet Too Large',
+        message: 'Your bet is too large for the current house balance. Please reduce your bet amount or target multiplier to continue.',
+        type: 'warning'
+      });
       return;
     }
 
     setIsPlaying(true);
     setLastResult(null);
+    setGameResult(null);
 
     try {
       const stakeInMist = Math.floor(stake * 1_000_000_000);
@@ -555,20 +582,15 @@ export default function CrashPage() {
         console.error('Error parsing crash result:', e);
       }
       
-      // Set the result with crash value BEFORE starting animation
+      // Store game result for animation but clear display result
       if (crashMultiplier !== null && !isNaN(crashMultiplier)) {
-        setLastResult({
-          success: didWin,
-          message: '', // Will be set later
-          txUrl: `https://suiexplorer.com/txblock/${result.digest}?network=${NETWORK}`,
-          crashMultiplier,
-          targetMultiplier,
-          isWinner: didWin,
-          payout: actualPayout
+        console.log('🏍️ Setting game result:', { crashed: !didWin, crashMultiplier, didWin });
+        setGameResult({
+          crashed: !didWin,
+          crashMultiplier
         });
       }
-      
-      // Start animation with known crash value
+      setLastResult(null);
       setIsAnimating(true);
       
       // Calculate animation duration based on crash multiplier
@@ -731,27 +753,38 @@ export default function CrashPage() {
                     <div className="relative w-72 h-72 mx-auto">
                       <Motorcycle 
                         isAnimating={isAnimating}
-                        crashed={lastResult?.isWinner === false}
-                        crashMultiplier={lastResult?.crashMultiplier || targetMultiplier}
+                        crashed={!isAnimating && gameResult?.crashed || false}
+                        crashMultiplier={gameResult?.crashMultiplier || targetMultiplier}
                       />
                       
-                      {/* Live Multiplier Display */}
+                      {/* Speedometer Display */}
                       {(isAnimating || (lastResult && currentMultiplier > 100)) && (
-                        <div className={`absolute top-4 right-4 px-4 py-2 rounded-lg backdrop-blur transition-all duration-300 ${
+                        <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-8 py-4 rounded-full border-4 backdrop-blur-sm transition-all duration-300 ${
                           !isAnimating && lastResult && !lastResult.isWinner 
-                            ? 'bg-red-900/90 animate-pulse' 
+                            ? 'bg-red-900/40 border-red-600/60 animate-pulse' 
                             : isAnimating 
-                              ? 'bg-black/90'
-                              : 'bg-green-900/90'
+                              ? 'bg-black/40 border-green-500/60'
+                              : 'bg-green-900/40 border-green-400/60'
                         }`}>
-                          <div className={`text-xl font-mono font-bold ${
-                            !isAnimating && lastResult && !lastResult.isWinner
-                              ? 'text-red-400'
-                              : isAnimating
-                                ? 'text-green-400'
-                                : 'text-green-300'
-                          }`}>
-                            {(currentMultiplier / 100).toFixed(2)}×
+                          <div className="text-center">
+                            <div className={`text-2xl font-mono font-bold ${
+                              !isAnimating && lastResult && !lastResult.isWinner
+                                ? 'text-red-400'
+                                : isAnimating
+                                  ? 'text-green-400'
+                                  : 'text-green-300'
+                            }`}>
+                              {Math.round(currentMultiplier * 0.8)} {/* Convert multiplier to "mph" */}
+                            </div>
+                            <div className={`text-xs font-semibold tracking-wider ${
+                              !isAnimating && lastResult && !lastResult.isWinner
+                                ? 'text-red-300'
+                                : isAnimating
+                                  ? 'text-green-300'
+                                  : 'text-green-200'
+                            }`}>
+                              MPH
+                            </div>
                             {!isAnimating && lastResult && !lastResult.isWinner && (
                               <div className="text-xs text-red-300 mt-1">CRASHED!</div>
                             )}
@@ -762,18 +795,12 @@ export default function CrashPage() {
                         </div>
                       )}
                       
-                      {/* Target Display */}
-                      {!isAnimating && (
-                        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-slate-800 to-slate-900 text-white px-6 py-3 rounded-lg shadow-lg ring-2 ring-slate-400/50">
-                          <div className="text-lg font-mono font-bold">Target: {targetMultiplier / 100}×</div>
-                        </div>
-                      )}
                     </div>
                   </div>
                   
                   <div className="space-y-4">
                     <h2 className="text-4xl font-thin text-gray-900 dark:text-gray-100">
-                      Crash Arena
+                      Cat Crash
                     </h2>
                     <div className="w-16 h-px bg-gradient-to-r from-transparent via-red-500 dark:via-red-400 to-transparent mx-auto"></div>
                   </div>
@@ -781,37 +808,12 @@ export default function CrashPage() {
 
                 {/* Center - Divider */}
                 <div className="hidden lg:block lg:col-span-1">
-                  <div className="w-px h-96 bg-gradient-to-b from-transparent via-gray-200 to-transparent mx-auto"></div>
+                  <div className="w-px h-96 bg-gradient-to-b from-transparent via-gray-200 dark:via-gray-700 to-transparent mx-auto"></div>
                 </div>
 
                 {/* Right - The Interface */}
                 <div className="lg:col-span-2 space-y-12">
                   
-                  {/* Target Multiplier Selection */}
-                  <div className="space-y-6">
-                    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-8 border border-gray-100 dark:border-gray-700 shadow-sm space-y-4 transition-colors duration-300">
-                      <h3 className="text-xl font-light text-gray-900 dark:text-gray-100">Target Multiplier</h3>
-                      
-                      {/* Target Slider */}
-                      <div className="space-y-4">
-                        <input
-                          type="range"
-                          min="120"
-                          max="500"
-                          step="10"
-                          value={targetMultiplier}
-                          onChange={(e) => setTargetMultiplier(parseInt(e.target.value))}
-                          disabled={isPlaying}
-                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-slate disabled:opacity-50"
-                        />
-                        <div className="text-center">
-                          <div className="text-3xl font-light text-slate-800 font-mono">{targetMultiplier / 100}×</div>
-                          <div className="text-xs text-gray-500 mt-1">Potential {((targetMultiplier / 100) * 0.97).toFixed(2)}x return</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Betting Panel */}
                   <BettingPanel
                     betAmount={betAmount}
@@ -819,6 +821,9 @@ export default function CrashPage() {
                     multiplier={calculatePayout(parseFloat(betAmount || '0'), targetMultiplier) / parseFloat(betAmount || '1')}
                     isPlaying={isPlaying}
                     gameName="Cat Crash"
+                    targetMultiplier={targetMultiplier}
+                    setTargetMultiplier={setTargetMultiplier}
+                    showTargetMultiplier={true}
                   />
 
                   {/* House Balance & Funding */}
@@ -922,7 +927,7 @@ export default function CrashPage() {
                           }`}>
                             {lastResult.success && lastResult.isWinner ? 'CASHED OUT!' : 'CRASHED!'}
                           </div>
-                          <div className="text-sm font-mono text-gray-600">
+                          <div className="text-sm font-mono text-gray-600 dark:text-white">
                             {lastResult.message}
                           </div>
                           {!lastResult.success && lastResult.message.includes('No recent crash game') && (
@@ -949,8 +954,8 @@ export default function CrashPage() {
                       </div>
                     )}
 
-                    {/* Game History */}
-                    {gameHistory.length > 0 && (
+                    {/* Game History - Hidden */}
+                    {false && gameHistory.length > 0 && (
                       <div className="border-t border-gray-100 pt-6">
                         <h4 className="text-sm font-medium text-gray-700 mb-3">Recent Rides</h4>
                         <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -989,7 +994,7 @@ export default function CrashPage() {
             <div className="w-16 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
             
             <p className="text-xs text-gray-400 font-mono tracking-wider">
-              Crash Arena • Ultra-low fees on SUI
+              In Memoriam Caesar • $CZAR
             </p>
             
             <div className="flex items-center justify-center gap-6 text-xs">
@@ -1085,6 +1090,15 @@ export default function CrashPage() {
           </div>
         </div>
       )}
+
+      {/* Professional Dialog */}
+      <Dialog
+        isOpen={dialog.isOpen}
+        onClose={() => setDialog({ ...dialog, isOpen: false })}
+        title={dialog.title}
+        message={dialog.message}
+        type={dialog.type}
+      />
     </div>
   );
 }
