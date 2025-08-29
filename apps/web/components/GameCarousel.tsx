@@ -135,10 +135,10 @@ export function GameCarousel() {
       transform: `translateX(${translateX}) scale(${scale})`,
       opacity,
       zIndex,
-      backfaceVisibility: 'hidden',
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale',
-      textRendering: 'optimizeLegibility',
+      backfaceVisibility: 'hidden' as const,
+      WebkitFontSmoothing: 'antialiased' as const,
+      MozOsxFontSmoothing: 'grayscale' as const,
+      textRendering: 'optimizeLegibility' as const,
     };
   };
 
@@ -147,9 +147,9 @@ export function GameCarousel() {
       {/* Carousel Container */}
       <div className="relative h-[320px] overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center" style={{
-          WebkitFontSmoothing: 'antialiased',
-          MozOsxFontSmoothing: 'grayscale',
-          textRendering: 'optimizeLegibility'
+          WebkitFontSmoothing: 'antialiased' as const,
+          MozOsxFontSmoothing: 'grayscale' as const,
+          textRendering: 'optimizeLegibility' as const
         }}>
           {games.map((game, index) => {
             const style = getCardStyle(index);
@@ -180,9 +180,9 @@ export function GameCarousel() {
                           />
                         </div>
                       </div>
-                      <h3 className="text-lg font-light text-gray-500 dark:text-gray-400" style={{WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility'}}>{game.name}</h3>
-                      <p className="text-sm text-gray-400 dark:text-gray-500" style={{WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility'}}>{game.description}</p>
-                      <div className="text-xs text-orange-600 dark:text-orange-400 font-medium" style={{WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility'}}>
+                      <h3 className="text-lg font-light text-gray-500 dark:text-gray-400" style={{WebkitFontSmoothing: 'antialiased' as const, textRendering: 'optimizeLegibility' as const}}>{game.name}</h3>
+                      <p className="text-sm text-gray-400 dark:text-gray-500" style={{WebkitFontSmoothing: 'antialiased' as const, textRendering: 'optimizeLegibility' as const}}>{game.description}</p>
+                      <div className="text-xs text-orange-600 dark:text-orange-400 font-medium" style={{WebkitFontSmoothing: 'antialiased' as const, textRendering: 'optimizeLegibility' as const}}>
                         {game.unlockMessage}
                       </div>
                     </div>
@@ -199,10 +199,10 @@ export function GameCarousel() {
                         alt={game.name}
                         className={`w-20 h-20 mx-auto rounded-full ${isCenter ? '' : 'opacity-90'}`}
                       />
-                      <h3 className="text-lg font-light text-gray-900 dark:text-gray-100" style={{WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility'}}>{game.name}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300" style={{WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility'}}>{game.description}</p>
+                      <h3 className="text-lg font-light text-gray-900 dark:text-gray-100" style={{WebkitFontSmoothing: 'antialiased' as const, textRendering: 'optimizeLegibility' as const}}>{game.name}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300" style={{WebkitFontSmoothing: 'antialiased' as const, textRendering: 'optimizeLegibility' as const}}>{game.description}</p>
                       {isCenter && (
-                        <div className="text-xs text-czar-gold dark:text-caesar-gold font-medium animate-pulse" style={{WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility'}}>
+                        <div className="text-xs text-czar-gold dark:text-caesar-gold font-medium animate-pulse" style={{WebkitFontSmoothing: 'antialiased' as const, textRendering: 'optimizeLegibility' as const}}>
                           Click to play →
                         </div>
                       )}
