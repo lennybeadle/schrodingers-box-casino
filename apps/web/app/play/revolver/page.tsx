@@ -8,6 +8,7 @@ import { Spinner } from '@/components/Spinner';
 import { BettingPanel } from '@/components/BettingPanel';
 import { GameNavigation } from '@/components/GameNavigation';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { GameLockedOverlay } from '@/components/GameLockedOverlay';
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 
@@ -343,6 +344,11 @@ export default function RevolverPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 relative transition-colors duration-300">
+      <GameLockedOverlay 
+        game="revolver"
+        gameTitle="Revolver Roulette" 
+        unlockMessage="Complete 50 Cat Crash games to unlock the revolver chamber and face the ultimate risk."
+      />
       <GameNavigation />
       
       {/* Network Status Banner */}

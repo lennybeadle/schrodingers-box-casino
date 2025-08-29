@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { SuiWalletButton } from '@/components/SuiWalletButton';
 import { GameNavigation } from '@/components/GameNavigation';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { useGameUnlocks } from '@/hooks/useGameUnlocks';
 
 export default function Home() {
   const NETWORK = process.env.NEXT_PUBLIC_SUI_NETWORK || 'testnet';
+  const { unlocks, getProgressToUnlock, loading: unlocksLoading } = useGameUnlocks();
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 relative transition-colors duration-300">
@@ -102,37 +104,89 @@ export default function Home() {
                   </div>
                 </Link>
 
-                <Link 
-                  href="/play/crash"
-                  className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105"
-                >
-                  <div className="text-center space-y-3">
-                    <img 
-                      src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/motorcycle.webp"
-                      alt="Cat Crash" 
-                      className="w-20 h-20 mx-auto rounded-full"
-                    />
-                    <h3 className="text-lg font-light text-gray-900 dark:text-gray-100">Cat Crash</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">Crash game • Up to 5x multiplier</p>
-                    <div className="text-xs text-gray-400 dark:text-gray-500">Click to play →</div>
+{unlocks.crash ? (
+                  <Link 
+                    href="/play/crash"
+                    className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105"
+                  >
+                    <div className="text-center space-y-3">
+                      <img 
+                        src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/motorcycle.webp"
+                        alt="Cat Crash" 
+                        className="w-20 h-20 mx-auto rounded-full"
+                      />
+                      <h3 className="text-lg font-light text-gray-900 dark:text-gray-100">Cat Crash</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Crash game • Up to 5x multiplier</p>
+                      <div className="text-xs text-gray-400 dark:text-gray-500">Click to play →</div>
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="group relative bg-white/40 dark:bg-gray-800/40 backdrop-blur rounded-2xl p-6 border border-gray-200 dark:border-gray-600 shadow-sm opacity-60">
+                    <div className="text-center space-y-3">
+                      <div className="relative">
+                        <img 
+                          src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/motorcycle.webp"
+                          alt="Cat Crash" 
+                          className="w-20 h-20 mx-auto rounded-full filter grayscale blur-sm"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <img 
+                            src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/locked.webp"
+                            alt="Locked" 
+                            className="w-8 h-8"
+                          />
+                        </div>
+                      </div>
+                      <h3 className="text-lg font-light text-gray-500 dark:text-gray-400">Cat Crash</h3>
+                      <p className="text-sm text-gray-400 dark:text-gray-500">Crash game • Up to 5x multiplier</p>
+                      <div className="text-xs text-orange-600 dark:text-orange-400 font-medium">
+                        {unlocksLoading ? 'Loading...' : `Play ${getProgressToUnlock('crash').remaining} more coinflip games`}
+                      </div>
+                    </div>
                   </div>
-                </Link>
+                )}
 
-                <Link 
-                  href="/play/revolver"
-                  className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105"
-                >
-                  <div className="text-center space-y-3">
-                    <img 
-                      src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/revolver.webp"
-                      alt="Revolver Roulette" 
-                      className="w-20 h-20 mx-auto rounded-full"
-                    />
-                    <h3 className="text-lg font-light text-gray-900 dark:text-gray-100">Revolver Roulette</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">Russian roulette • 7.76x payout</p>
-                    <div className="text-xs text-gray-400 dark:text-gray-500">Click to play →</div>
+{unlocks.revolver ? (
+                  <Link 
+                    href="/play/revolver"
+                    className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105"
+                  >
+                    <div className="text-center space-y-3">
+                      <img 
+                        src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/revolver.webp"
+                        alt="Revolver Roulette" 
+                        className="w-20 h-20 mx-auto rounded-full"
+                      />
+                      <h3 className="text-lg font-light text-gray-900 dark:text-gray-100">Revolver Roulette</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Russian roulette • 7.76x payout</p>
+                      <div className="text-xs text-gray-400 dark:text-gray-500">Click to play →</div>
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="group relative bg-white/40 dark:bg-gray-800/40 backdrop-blur rounded-2xl p-6 border border-gray-200 dark:border-gray-600 shadow-sm opacity-60">
+                    <div className="text-center space-y-3">
+                      <div className="relative">
+                        <img 
+                          src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/revolver.webp"
+                          alt="Revolver Roulette" 
+                          className="w-20 h-20 mx-auto rounded-full filter grayscale blur-sm"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <img 
+                            src="https://fmijmundotmgtsemfdat.supabase.co/storage/v1/object/public/avatars/locked.webp"
+                            alt="Locked" 
+                            className="w-8 h-8"
+                          />
+                        </div>
+                      </div>
+                      <h3 className="text-lg font-light text-gray-500 dark:text-gray-400">Revolver Roulette</h3>
+                      <p className="text-sm text-gray-400 dark:text-gray-500">Russian roulette • 7.76x payout</p>
+                      <div className="text-xs text-orange-600 dark:text-orange-400 font-medium">
+                        {unlocksLoading ? 'Loading...' : `Play ${getProgressToUnlock('revolver').remaining} more crash games`}
+                      </div>
+                    </div>
                   </div>
-                </Link>
+                )}
               </div>
             </div>
           </div>

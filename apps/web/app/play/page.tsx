@@ -366,31 +366,31 @@ export default function Play() {
 
                 {/* All Bets Tab */}
                 {activeTab === 'all-bets' && (
-                  <div className="bg-white border border-gray-200 rounded-lg">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900">All Bets</h3>
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">All Bets</h3>
                     </div>
                     <div className="max-h-96 overflow-y-auto">
                       {allBets.length === 0 ? (
-                        <div className="px-6 py-12 text-center text-gray-500">
+                        <div className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                           No bets found on the network.
                         </div>
                       ) : (
-                        <div className="divide-y divide-gray-100">
+                        <div className="divide-y divide-gray-100 dark:divide-gray-700">
                           {allBets.map((bet, index) => (
                             <div key={index} className="px-6 py-4">
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center space-x-3">
                                   <div className={`w-3 h-3 rounded-full ${bet.isWinner ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                  <div className="font-mono text-sm">{formatAddress(bet.player)}</div>
-                                  <div className="font-semibold">{bet.amount.toFixed(3)} SUI</div>
+                                  <div className="font-mono text-sm text-gray-900 dark:text-gray-100">{formatAddress(bet.player)}</div>
+                                  <div className="font-semibold text-gray-900 dark:text-gray-100">{bet.amount.toFixed(3)} SUI</div>
                                   <div className={`text-sm px-2 py-1 rounded ${
-                                    bet.isWinner ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                    bet.isWinner ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400'
                                   }`}>
                                     {bet.isWinner ? `Won ${bet.payout.toFixed(3)}` : 'Lost'}
                                   </div>
                                 </div>
-                                <div className="text-sm text-gray-500">{formatTime(bet.timestamp)}</div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">{formatTime(bet.timestamp)}</div>
                               </div>
                               <div className="text-xs text-gray-400 dark:text-gray-500 font-mono">
                                 {bet.game && (
@@ -446,11 +446,11 @@ export default function Play() {
               
               <div className="space-y-8">
                 <div className="space-y-4">
-                  <h2 className="text-3xl font-thin text-gray-800 tracking-wide">
+                  <h2 className="text-3xl font-thin text-gray-800 dark:text-gray-100 tracking-wide">
                     Connect to Enter
                   </h2>
                   <div className="w-12 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
-                  <p className="text-gray-500 font-light max-w-sm mx-auto leading-relaxed">
+                  <p className="text-gray-500 dark:text-gray-400 font-light max-w-sm mx-auto leading-relaxed">
                     The Emperor's arena awaits your wallet connection
                   </p>
                 </div>

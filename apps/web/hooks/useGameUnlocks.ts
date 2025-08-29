@@ -1,0 +1,161 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useCurrentAccount } from '@mysten/dapp-kit';
+import { suiClient } from '@/lib/suiClient';
+
+export interface GameProgress {
+  coinflip: number;
+  crash: number;
+  revolver: number;
+}
+
+export interface UnlockRequirements {
+  coinflip: 0; // Always unlocked
+  crash: 10; // Requires 10 coinflip games
+  revolver: 50; // Requires 50 crash games
+}
+
+export interface GameUnlocks {
+  coinflip: boolean;
+  crash: boolean;
+  revolver: boolean;
+}
+
+const UNLOCK_REQUIREMENTS: UnlockRequirements = {
+  coinflip: 0,
+  crash: 10,
+  revolver: 50
+};
+
+export function useGameUnlocks() {
+  const currentAccount = useCurrentAccount();
+  const [progress, setProgress] = useState<GameProgress>({ coinflip: 0, crash: 0, revolver: 0 });
+  const [unlocks, setUnlocks] = useState<GameUnlocks>({ coinflip: true, crash: false, revolver: false });
+  const [loading, setLoading] = useState(true);
+
+  const fetchGameProgress = async () => {
+    if (!currentAccount) {
+      setProgress({ coinflip: 0, crash: 0, revolver: 0 });
+      setUnlocks({ coinflip: true, crash: false, revolver: false });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Fetch all game events (without sender filter) then filter by player
+      const [coinflipEvents, crashEvents, revolverEvents] = await Promise.all([
+        // Coinflip events (BetPlaced)
+        suiClient.queryEvents({
+          query: {
+            MoveEventType: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::casino::BetPlaced`
+          },
+          limit: 1000, // Get more to ensure we count all games
+          order: 'descending'
+        }),
+        // Crash events (CrashEvent) 
+        suiClient.queryEvents({
+          query: {
+            MoveEventType: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::crash::CrashEvent`
+          },
+          limit: 1000,
+          order: 'descending'
+        }),
+        // Revolver events (SpinEvent)
+        suiClient.queryEvents({
+          query: {
+            MoveEventType: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::revolver::SpinEvent`
+          },
+          limit: 1000,
+          order: 'descending'
+        })
+      ]);
+
+      // Filter events by the current player address
+      const playerCoinflipEvents = coinflipEvents.data.filter(event => 
+        (event.parsedJson as any)?.player === currentAccount.address
+      );
+      const playerCrashEvents = crashEvents.data.filter(event => 
+        (event.parsedJson as any)?.player === currentAccount.address
+      );
+      const playerRevolverEvents = revolverEvents.data.filter(event => 
+        (event.parsedJson as any)?.player === currentAccount.address
+      );
+
+      const coinflipCount = playerCoinflipEvents.length;
+      const crashCount = playerCrashEvents.length;
+      const revolverCount = playerRevolverEvents.length;
+
+      console.log('Debug event fetching:', {
+        coinflipEventsTotal: coinflipEvents.data.length,
+        crashEventsTotal: crashEvents.data.length,
+        revolverEventsTotal: revolverEvents.data.length,
+        playerAddress: currentAccount.address,
+        sampleCoinflipEvent: coinflipEvents.data[0],
+        sampleCrashEvent: crashEvents.data[0],
+        sampleRevolverEvent: revolverEvents.data[0]
+      });
+
+      console.log('Game unlock counts:', { 
+        coinflipCount, 
+        crashCount, 
+        revolverCount,
+        playerAddress: currentAccount.address 
+      });
+
+      const newProgress: GameProgress = {
+        coinflip: coinflipCount,
+        crash: crashCount,
+        revolver: revolverCount
+      };
+
+      const newUnlocks: GameUnlocks = {
+        coinflip: true, // Always unlocked
+        crash: coinflipCount >= UNLOCK_REQUIREMENTS.crash,
+        revolver: crashCount >= UNLOCK_REQUIREMENTS.revolver
+      };
+
+      setProgress(newProgress);
+      setUnlocks(newUnlocks);
+
+    } catch (error) {
+      console.error('Failed to fetch game progress:', error);
+      // On error, assume no progress
+      setProgress({ coinflip: 0, crash: 0, revolver: 0 });
+      setUnlocks({ coinflip: true, crash: false, revolver: false });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGameProgress();
+  }, [currentAccount]);
+
+  const getProgressToUnlock = (game: 'crash' | 'revolver'): { current: number; required: number; remaining: number } => {
+    if (game === 'crash') {
+      return {
+        current: progress.coinflip,
+        required: UNLOCK_REQUIREMENTS.crash,
+        remaining: Math.max(0, UNLOCK_REQUIREMENTS.crash - progress.coinflip)
+      };
+    } else {
+      return {
+        current: progress.crash,
+        required: UNLOCK_REQUIREMENTS.revolver,
+        remaining: Math.max(0, UNLOCK_REQUIREMENTS.revolver - progress.crash)
+      };
+    }
+  };
+
+  return {
+    progress,
+    unlocks,
+    loading,
+    requirements: UNLOCK_REQUIREMENTS,
+    getProgressToUnlock,
+    refetch: fetchGameProgress
+  };
+}

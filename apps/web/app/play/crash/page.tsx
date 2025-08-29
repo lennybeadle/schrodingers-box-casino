@@ -9,6 +9,8 @@ import { GameNavigation } from '@/components/GameNavigation';
 import { Motorcycle } from '@/components/Motorcycle';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Dialog } from '@/components/Dialog';
+import { GameLockedOverlay } from '@/components/GameLockedOverlay';
+import { UnlockProgress } from '@/components/UnlockProgress';
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 
@@ -658,6 +660,11 @@ export default function CrashPage() {
   
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
+      <GameLockedOverlay 
+        game="crash"
+        gameTitle="Cat Crash" 
+        unlockMessage="Complete 10 Caesar's CoinFlip games to unlock the crash arena and test your timing skills."
+      />
       <GameNavigation />
       {/* Sui Network Banner */}
       <div className={`border-b px-6 py-2 ${
@@ -825,6 +832,11 @@ export default function CrashPage() {
                     setTargetMultiplier={setTargetMultiplier}
                     showTargetMultiplier={true}
                   />
+
+                  {/* Unlock Progress */}
+                  <div className="py-4">
+                    <UnlockProgress showNextUnlock="revolver" />
+                  </div>
 
                   {/* House Balance & Funding */}
                   <div className="text-center py-4 border-t border-gray-100">

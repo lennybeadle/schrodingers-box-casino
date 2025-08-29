@@ -2,6 +2,7 @@
 
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useGameUnlocks } from '@/hooks/useGameUnlocks';
 
 interface Game {
   path: string;
@@ -18,14 +19,24 @@ const games: Game[] = [
 export function GameNavigation() {
   const router = useRouter();
   const pathname = usePathname();
+  const { unlocks } = useGameUnlocks();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   // Find current game index
   const currentIndex = games.findIndex(g => g.path === pathname);
-  const canGoLeft = currentIndex > 0;
-  const canGoRight = currentIndex < games.length - 1;
+  
+  // Check if games are unlocked
+  const isGameUnlocked = (path: string) => {
+    if (path === '/play/coinflip') return true;
+    if (path === '/play/crash') return unlocks.crash;
+    if (path === '/play/revolver') return unlocks.revolver;
+    return false;
+  };
+  
+  const canGoLeft = currentIndex > 0 && isGameUnlocked(games[currentIndex - 1]?.path);
+  const canGoRight = currentIndex < games.length - 1 && isGameUnlocked(games[currentIndex + 1]?.path);
 
   const navigateToGame = (direction: 'left' | 'right') => {
     if (isTransitioning) return;
@@ -147,17 +158,24 @@ export function GameNavigation() {
 
       {/* Game Indicator Dots */}
       <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-40 flex gap-2">
-        {games.map((game, index) => (
-          <div
-            key={game.path}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              index === currentIndex 
-                ? 'bg-czar-gold w-8' 
-                : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
-            }`}
-            title={game.name}
-          />
-        ))}
+        {games.map((game, index) => {
+          const isUnlocked = isGameUnlocked(game.path);
+          const isActive = index === currentIndex;
+          
+          return (
+            <div
+              key={game.path}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                isActive 
+                  ? 'bg-czar-gold w-8' 
+                  : isUnlocked 
+                    ? 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                    : 'bg-red-400 dark:bg-red-600 opacity-50'
+              }`}
+              title={isUnlocked ? game.name : `${game.name} (Locked)`}
+            />
+          );
+        })}
       </div>
     </>
   );
