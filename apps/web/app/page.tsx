@@ -76,11 +76,11 @@ export default function Home() {
                 {/* Contract Address */}
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 max-w-lg mx-auto border border-gray-200 dark:border-gray-700">
                   <div className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">
-                    $CZAR CA (solana)
+                    $CZAR Contract Address
                   </div>
                   <div className="text-center">
                     <span className="text-gray-400 dark:text-gray-500 font-mono text-sm italic">
-                      Ca7vUZfjuGk15zBZjyVHUmRQWUiMNiPJgSB2xuLXpump
+                      Coming Soon
                     </span>
                   </div>
                 </div>
