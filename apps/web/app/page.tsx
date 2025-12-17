@@ -73,7 +73,7 @@ export default function Home() {
                   Choose your game and start playing.
                 </p>
 
-                {/* Contract Address */}
+                {/* Contract Addresss */}
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 max-w-lg mx-auto border border-gray-200 dark:border-gray-700">
                   <div className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">
                     $CZAR Contract Address
